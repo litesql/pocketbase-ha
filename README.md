@@ -80,7 +80,7 @@ Set up your environment variables to configure the cluster:
 2. Start a second instance in a different directory:
 
     ```sh
-    PB_NAME=node2 PB_REPLICATION_URL=nats://localhost:4222 pocketbase-ha serve --http 127.0.0.1:8091
+    PB_ASYNC_PUBLISHER=true PB_NAME=node2 PB_REPLICATION_URL=nats://localhost:4222 pocketbase-ha serve --http 127.0.0.1:8091
     ```
 
 > **Note**: You can skip setting the superuser password for the second instance.
