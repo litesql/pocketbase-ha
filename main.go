@@ -43,6 +43,17 @@ func init() {
 		},
 	}
 
+	if async := os.Getenv("PB_ASYNC_PUBLISHER"); async != "" {
+		b, err := strconv.ParseBool(async)
+		if err != nil {
+			log.Fatalf("invalid PB_ASYNC_PUBLISHER: %v", err)
+		}
+		if b {
+			drv.Options = append(drv.Options, ha.WithAsyncPublisher(),
+				ha.WithAsyncPublisherOutboxDir(os.Getenv("PB_ASYNC_PUBLISHER_DIR")))
+		}
+	}
+
 	stream := os.Getenv("PB_REPLICATION_STREAM")
 	if stream == "" {
 		stream = "pb"
@@ -86,6 +97,11 @@ func main() {
 
 	app.OnServe().BindFunc(func(e *core.ServeEvent) error {
 		close(bootstrap)
+		return e.Next()
+	})
+
+	app.OnTerminate().BindFunc(func(e *core.TerminateEvent) error {
+		ha.Shutdown()
 		return e.Next()
 	})
 
