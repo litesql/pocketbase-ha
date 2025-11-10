@@ -61,11 +61,12 @@ Set up your environment variables to configure the cluster:
 | `PB_ASYNC_PUBLISHER` | Enables asynchronous replication message publishing. Recommended only when using an external NATS server. | false |
 | `PB_ASYNC_PUBLISHER_DIR` | Directory path for storing outbox messages used in asynchronous replication. |    |
 | `PB_NAME`                | Unique identifier for the node.                                              | $HOSTNAME |
-| `PB_REPLICATION_URL` | NATS connection URL for replication (use if connecting to an external NATS server). Example: `nats://localhost:4222`. | |
-| `PB_REPLICATION_STREAM` | Stream name for data replication | pb |
 | `PB_NATS_PORT`       | Port for the embedded NATS server (use only if running an embedded NATS server). | |
 | `PB_NATS_STORE_DIR`  | Directory for storing data for the embedded NATS server.                   | /tmp/nats |
 | `PB_NATS_CONFIG`     | Path to a NATS configuration file (overrides other NATS settings).         | |
+| `PB_REPLICATION_URL` | NATS connection URL for replication (use if connecting to an external NATS server). Example: `nats://localhost:4222`. | |
+| `PB_REPLICATION_STREAM` | Stream name for data replication | pb |
+| `PB_ROW_IDENTIFY` | Strategy used to identify rows during replication. Options: `rowid` or `full`. | rowid |
 
 ## Usage
 

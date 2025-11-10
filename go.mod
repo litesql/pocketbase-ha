@@ -3,8 +3,8 @@ module github.com/litesql/pocketbase-ha
 go 1.25
 
 require (
-	github.com/litesql/go-ha v0.0.20
-	github.com/litesql/go-sqlite-ha v0.0.8
+	github.com/litesql/go-ha v0.0.22
+	github.com/litesql/go-sqlite-ha v0.0.9
 	github.com/litesql/sqlite v1.39.6
 	github.com/pocketbase/dbx v1.11.0
 	github.com/pocketbase/pocketbase v0.32.0

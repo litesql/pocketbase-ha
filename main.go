@@ -83,6 +83,19 @@ func init() {
 		drv.Options = append(drv.Options, ha.WithReplicas(replicasInt))
 	}
 	drv.Options = append(drv.Options, ha.WithEmbeddedNatsConfig(embeddedNatsConfig))
+
+	rowIdentify := os.Getenv("PB_ROW_IDENTIFY")
+	if rowIdentify != "" {
+		switch rowIdentify {
+		case string(ha.Rowid):
+			drv.Options = append(drv.Options, ha.WithRowIdentify(ha.Rowid))
+		case string(ha.Full):
+			drv.Options = append(drv.Options, ha.WithRowIdentify(ha.Full))
+		default:
+			panic("invaid PB_ROW_IDENTIFY: " + rowIdentify)
+		}
+	}
+
 	sql.Register("pb_ha", &drv)
 
 	dbx.BuilderFuncMap["pb_ha"] = dbx.BuilderFuncMap["sqlite"]
