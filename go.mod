@@ -1,8 +1,9 @@
 module github.com/litesql/pocketbase-ha
 
 go 1.25
+
 require (
-	github.com/litesql/go-ha v0.1.5
+	github.com/litesql/go-ha v0.1.7
 	github.com/litesql/go-sqlite-ha v0.1.0
 	github.com/litesql/sqlite v1.39.7
 	github.com/pocketbase/dbx v1.11.0

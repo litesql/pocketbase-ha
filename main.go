@@ -126,12 +126,29 @@ func main() {
 	app.OnServe().BindFunc(func(se *core.ServeEvent) error {
 		close(bootstrap)
 
-		// force sync token definition
-		_, err := app.ConcurrentDB().Update("_collections",
-			dbx.Params{"updated": time.Now().Format("2006-01-02 15:04:05.000Z")},
-			dbx.In("name", "_superusers", "users")).Execute()
-		if err != nil {
-			return fmt.Errorf("failed to sync configure: %w", err)
+		var dataDSN string
+		for _, dsn := range ha.ListDSN() {
+			if strings.HasSuffix(dsn, "data.db") {
+				dataDSN = dsn
+				break
+			}
+		}
+
+		connector, ok := ha.LookupConnector(dataDSN)
+		if !ok {
+			return fmt.Errorf("connector not found")
+		}
+		slog.Info("waiting for the leader")
+		<-connector.LeaderProvider().Ready()
+
+		if connector.LeaderProvider().IsLeader() {
+			// force sync token definition
+			_, err := app.ConcurrentDB().Update("_collections",
+				dbx.Params{"updated": time.Now().Format("2006-01-02 15:04:05.000Z")},
+				dbx.In("name", "_superusers", "users")).Execute()
+			if err != nil {
+				return fmt.Errorf("failed to sync configure: %w", err)
+			}
 		}
 
 		superuserEmail := os.Getenv("PB_SUPERUSER_EMAIL")
@@ -155,21 +172,6 @@ func main() {
 				return fmt.Errorf("failed to set superuser account: %w", err)
 			}
 		}
-
-		var dataDSN string
-		for _, dsn := range ha.ListDSN() {
-			if strings.HasSuffix(dsn, "data.db") {
-				dataDSN = dsn
-				break
-			}
-		}
-
-		connector, ok := ha.LookupConnector(dataDSN)
-		if !ok {
-			return fmt.Errorf("connector not found")
-		}
-		slog.Info("waiting for the leader")
-		<-connector.LeaderProvider().Ready()
 
 		timeout := 10 * time.Second
 
