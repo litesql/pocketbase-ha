@@ -11,6 +11,9 @@ services:
       - PB_NAME=node1
       - PB_NATS_CONFIG=/etc/nats/node1.cfg
       - PB_REPLICAS=1
+      - PB_LOCAL_TARGET=http://node1:8090
+      - PB_SUPERUSER_EMAIL=test@example.com
+      - PB_SUPERUSER_PASS=1234567890
 
   node2:
     image: ghcr.io/litesql/pocketbase-ha:latest
@@ -24,6 +27,7 @@ services:
       - PB_NAME=node2
       - PB_NATS_CONFIG=/etc/nats/node2.cfg
       - PB_REPLICAS=1
+      - PB_LOCAL_TARGET=http://node2:8090
 
   node3:
     image: ghcr.io/litesql/pocketbase-ha:latest
@@ -37,6 +41,7 @@ services:
       - PB_NAME=node3
       - PB_NATS_CONFIG=/etc/nats/node3.cfg
       - PB_REPLICAS=1
+      - PB_LOCAL_TARGET=http://node3:8090
 
 volumes:
   node1_data:

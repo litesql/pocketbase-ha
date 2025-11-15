@@ -1,11 +1,18 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
+	"fmt"
+	"io"
 	"log"
+	"log/slog"
+	"net/http"
 	"os"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/litesql/go-ha"
 	sqliteha "github.com/litesql/go-sqlite-ha"
@@ -95,6 +102,14 @@ func init() {
 			panic("invaid PB_ROW_IDENTIFY: " + rowIdentify)
 		}
 	}
+	if leader := os.Getenv("PB_STATIC_LEADER"); leader != "" {
+		drv.Options = append(drv.Options, ha.WithLeaderProvider(&ha.StaticLeader{
+			Target: leader,
+		}))
+	}
+	if redirect := os.Getenv("PB_LOCAL_TARGET"); redirect != "" {
+		drv.Options = append(drv.Options, ha.WithLeaderElectionLocalTarget(redirect))
+	}
 
 	sql.Register("pb_ha", &drv)
 
@@ -108,9 +123,144 @@ func main() {
 		},
 	})
 
-	app.OnServe().BindFunc(func(e *core.ServeEvent) error {
+	app.OnServe().BindFunc(func(se *core.ServeEvent) error {
 		close(bootstrap)
-		return e.Next()
+
+		// force sync token definition
+		_, err := app.ConcurrentDB().Update("_collections",
+			dbx.Params{"updated": time.Now().Format("2006-01-02 15:04:05.000Z")},
+			dbx.In("name", "_superusers", "users")).Execute()
+		if err != nil {
+			return fmt.Errorf("failed to sync configure: %w", err)
+		}
+
+		superuserEmail := os.Getenv("PB_SUPERUSER_EMAIL")
+		superuserPass := os.Getenv("PB_SUPERUSER_PASS")
+		if superuserEmail != "" && superuserPass != "" {
+
+			superusersCol, err := app.FindCachedCollectionByNameOrId(core.CollectionNameSuperusers)
+			if err != nil {
+				return fmt.Errorf("failed to fetch %q collection: %w", core.CollectionNameSuperusers, err)
+			}
+
+			superuser, err := app.FindAuthRecordByEmail(superusersCol, superuserEmail)
+			if err != nil {
+				superuser = core.NewRecord(superusersCol)
+			}
+
+			superuser.SetEmail(superuserEmail)
+			superuser.SetPassword(superuserPass)
+
+			if err := app.Save(superuser); err != nil {
+				return fmt.Errorf("failed to set superuser account: %w", err)
+			}
+		}
+
+		var dataDSN string
+		for _, dsn := range ha.ListDSN() {
+			if strings.HasSuffix(dsn, "data.db") {
+				dataDSN = dsn
+				break
+			}
+		}
+
+		connector, ok := ha.LookupConnector(dataDSN)
+		if !ok {
+			return fmt.Errorf("connector not found")
+		}
+		slog.Info("waiting for the leader")
+		<-connector.LeaderProvider().Ready()
+
+		timeout := 10 * time.Second
+
+		se.Router.BindFunc(func(e *core.RequestEvent) error {
+			if connector.LeaderProvider().IsLeader() ||
+				strings.Contains(e.Request.URL.Path, "/auth-with-password") ||
+				strings.Contains(e.Request.URL.Path, "/auth-refresh") {
+				if e.Request.Method != "GET" {
+					e.Response = connector.ResponseWriter(e.Response)
+				}
+				return e.Next()
+			}
+
+			switch e.Request.Method {
+			case "POST", "PUT", "PATCH", "DELETE":
+				target := connector.LeaderProvider().RedirectTarget()
+				if target == "" {
+					return e.InternalServerError("leader redirect URL not found", nil)
+				}
+				resp, err := forwardTo(target, e.Request, timeout)
+				if err != nil {
+					return e.InternalServerError(err.Error(), nil)
+				}
+				defer resp.Body.Close()
+				for k, v := range resp.Header {
+					for i, value := range v {
+						if i == 0 {
+							e.Response.Header().Set(k, value)
+							continue
+						}
+						e.Response.Header().Add(k, value)
+					}
+				}
+				e.Response.WriteHeader(resp.StatusCode)
+				io.Copy(e.Response, resp.Body)
+				return nil
+			case "GET":
+				var txSeq uint64
+				if cookie, _ := e.Request.Cookie(ha.TXCookieName); cookie != nil {
+					var err error
+					txSeq, err = strconv.ParseUint(cookie.Value, 10, 64)
+					if err != nil {
+						slog.Warn("invalid cookie", "name", ha.TXCookieName, "error", err)
+						return e.Next()
+					}
+				}
+
+				ticker := time.NewTicker(time.Millisecond)
+				defer ticker.Stop()
+
+				ctx, cancel := context.WithTimeout(e.Request.Context(), timeout)
+				defer cancel()
+			LOOP:
+				for {
+					if connector.LatestSeq() >= txSeq {
+						break LOOP
+					}
+
+					select {
+					case <-ctx.Done():
+						target := connector.LeaderProvider().RedirectTarget()
+						if target == "" {
+							return e.InternalServerError("leader redirect URL not found", nil)
+						}
+						resp, err := forwardTo(target, e.Request, timeout)
+						if err != nil {
+							return e.InternalServerError(err.Error(), nil)
+						}
+						defer resp.Body.Close()
+						for k, v := range resp.Header {
+							for i, value := range v {
+								if i == 0 {
+									e.Response.Header().Set(k, value)
+									continue
+								}
+								e.Response.Header().Add(k, value)
+							}
+						}
+						e.Response.WriteHeader(resp.StatusCode)
+						io.Copy(e.Response, resp.Body)
+						return nil
+					case <-ticker.C:
+					}
+				}
+			}
+
+			return e.Next()
+
+		})
+
+		return se.Next()
 	})
 
 	app.OnTerminate().BindFunc(func(e *core.TerminateEvent) error {
@@ -129,11 +279,6 @@ type ChangeSetInterceptor struct {
 }
 
 func (i *ChangeSetInterceptor) BeforeApply(cs *ha.ChangeSet, _ *sql.Conn) (skip bool, err error) {
-	for _, change := range cs.Changes {
-		if change.Table == "_authOrigins" {
-			return true, nil
-		}
-	}
 	return false, nil
 }
 
@@ -268,4 +413,31 @@ func (m *Model) triggerAfterDelete(app core.App, event *core.ModelEvent) {
 		return
 	}
 	app.OnModelAfterDeleteSuccess().Trigger(event)
+}
+
+func forwardTo(addr string, req *http.Request, timeout time.Duration) (*http.Response, error) {
+	newURL := addr + req.URL.Path + "?" + req.URL.RawQuery
+
+	var buf bytes.Buffer
+	defer req.Body.Close()
+	_, err := io.Copy(&buf, req.Body)
+	if err != nil {
+		return nil, err
+	}
+	ctx, cancel := context.WithTimeout(req.Context(), timeout)
+	defer cancel()
+	newReq, err := http.NewRequestWithContext(ctx, req.Method, newURL, &buf)
+	if err != nil {
+		return nil, err
+	}
+	for k, v := range req.Header {
+		for i, value := range v {
+			if i == 0 {
+				newReq.Header.Set(k, value)
+				continue
+			}
+			newReq.Header.Add(k, value)
+		}
+	}
+	return http.DefaultClient.Do(newReq)
 }
