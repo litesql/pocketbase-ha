@@ -3,7 +3,7 @@ Highly Available Leader/Leaderless [PocketBase](https://pocketbase.io/) Cluster 
 
 ## Features
 
-- **High Availability**: Run multiple PocketBase instances in a leaderless cluster.
+- **High Availability**: Run multiple PocketBase instances in a leader or leaderless cluster.
 - **Replication**: Synchronize data across nodes using NATS.
 - **Embedded or External NATS**: Choose between an embedded NATS server or an external one for replication.
 
@@ -138,4 +138,3 @@ Contributions are welcome! Feel free to open issues or submit pull requests to i
 
 This project is licensed under the [MIT License](LICENSE).
 
-PB_NAME=node1 PB_REDIRECT_TARGET=http://localhost:8090 PB_REPLICATION_URL=nats://localhost:4222 /tmp/pocketbase-ha serve --http 127.0.0.1:8090
