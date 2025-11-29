@@ -1,14 +1,11 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"database/sql"
 	"fmt"
-	"io"
 	"log"
 	"log/slog"
-	"net/http"
 	"os"
 	"strconv"
 	"strings"
@@ -19,6 +16,7 @@ import (
 	"github.com/litesql/sqlite"
 	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase"
+	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
 )
 
@@ -174,94 +172,8 @@ func main() {
 		}
 
 		timeout := 10 * time.Second
-
-		se.Router.BindFunc(func(e *core.RequestEvent) error {
-			if connector.LeaderProvider().IsLeader() ||
-				strings.Contains(e.Request.URL.Path, "/auth-with-password") ||
-				strings.Contains(e.Request.URL.Path, "/auth-refresh") {
-				if e.Request.Method != "GET" {
-					e.Response = connector.ResponseWriter(e.Response)
-				}
-				return e.Next()
-			}
-
-			switch e.Request.Method {
-			case "POST", "PUT", "PATCH", "DELETE":
-				target := connector.LeaderProvider().RedirectTarget()
-				if target == "" {
-					return e.InternalServerError("leader redirect URL not found", nil)
-				}
-				resp, err := forwardTo(target, e.Request, timeout)
-				if err != nil {
-					return e.InternalServerError(err.Error(), nil)
-				}
-				defer resp.Body.Close()
-				for k, v := range resp.Header {
-					for i, value := range v {
-						if i == 0 {
-							e.Response.Header().Set(k, value)
-							continue
-						}
-						e.Response.Header().Add(k, value)
-					}
-				}
-				e.Response.WriteHeader(resp.StatusCode)
-				io.Copy(e.Response, resp.Body)
-				return nil
-			case "GET":
-				var txSeq uint64
-				if cookie, _ := e.Request.Cookie(ha.TXCookieName); cookie != nil {
-					var err error
-					txSeq, err = strconv.ParseUint(cookie.Value, 10, 64)
-					if err != nil {
-						slog.Warn("invalid cookie", "name", ha.TXCookieName, "error", err)
-						return e.Next()
-					}
-				}
-
-				ticker := time.NewTicker(time.Millisecond)
-				defer ticker.Stop()
-
-				ctx, cancel := context.WithTimeout(e.Request.Context(), timeout)
-				defer cancel()
-			LOOP:
-				for {
-					if connector.LatestSeq() >= txSeq {
-						break LOOP
-					}
-
-					select {
-					case <-ctx.Done():
-						target := connector.LeaderProvider().RedirectTarget()
-						if target == "" {
-							return e.InternalServerError("leader redirect URL not found", nil)
-						}
-						resp, err := forwardTo(target, e.Request, timeout)
-						if err != nil {
-							return e.InternalServerError(err.Error(), nil)
-						}
-						defer resp.Body.Close()
-						for k, v := range resp.Header {
-							for i, value := range v {
-								if i == 0 {
-									e.Response.Header().Set(k, value)
-									continue
-								}
-								e.Response.Header().Add(k, value)
-							}
-						}
-						e.Response.WriteHeader(resp.StatusCode)
-						io.Copy(e.Response, resp.Body)
-						return nil
-					case <-ticker.C:
-					}
-				}
-			}
-
-			return e.Next()
-
-		})
-
+		se.Router.BindFunc(apis.WrapStdMiddleware(connector.ForwardToLeader(timeout, "POST", "PUT", "PATCH", "DELETE")))
+		se.Router.BindFunc(apis.WrapStdMiddleware(connector.ConsistentReader(timeout, "GET")))
 		return se.Next()
 	})
 
@@ -415,31 +327,4 @@ func (m *Model) triggerAfterDelete(app core.App, event *core.ModelEvent) {
 		return
 	}
 	app.OnModelAfterDeleteSuccess().Trigger(event)
-}
-
-func forwardTo(addr string, req *http.Request, timeout time.Duration) (*http.Response, error) {
-	newURL := addr + req.URL.Path + "?" + req.URL.RawQuery
-
-	var buf bytes.Buffer
-	defer req.Body.Close()
-	_, err := io.Copy(&buf, req.Body)
-	if err != nil {
-		return nil, err
-	}
-	ctx, cancel := context.WithTimeout(req.Context(), timeout)
-	defer cancel()
-	newReq, err := http.NewRequestWithContext(ctx, req.Method, newURL, &buf)
-	if err != nil {
-		return nil, err
-	}
-	for k, v := range req.Header {
-		for i, value := range v {
-			if i == 0 {
-				newReq.Header.Set(k, value)
-				continue
-			}
-			newReq.Header.Add(k, value)
-		}
-	}
-	return http.DefaultClient.Do(newReq)
 }
