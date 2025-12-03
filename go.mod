@@ -3,8 +3,8 @@ module github.com/litesql/pocketbase-ha
 go 1.25
 
 require (
-	github.com/litesql/go-ha v0.1.8
-	github.com/litesql/go-sqlite-ha v0.1.0
+	github.com/litesql/go-ha v0.2.1
+	github.com/litesql/go-sqlite-ha v0.2.0
 	github.com/litesql/sqlite v1.39.7
 	github.com/pocketbase/dbx v1.11.0
 	github.com/pocketbase/pocketbase v0.34.0
@@ -27,7 +27,7 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/klauspost/compress v1.18.1 // indirect
+	github.com/klauspost/compress v1.18.2 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/minio/highwayhash v1.0.4-0.20251030100505-070ab1a87a76 // indirect

@@ -92,6 +92,8 @@ func init() {
 	rowIdentify := os.Getenv("PB_ROW_IDENTIFY")
 	if rowIdentify != "" {
 		switch rowIdentify {
+		case string(ha.PK):
+			drv.Options = append(drv.Options, ha.WithRowIdentify(ha.PK))
 		case string(ha.Rowid):
 			drv.Options = append(drv.Options, ha.WithRowIdentify(ha.Rowid))
 		case string(ha.Full):
@@ -240,16 +242,16 @@ func ModelFromChange(c ha.Change, err error) *Model {
 		m.new = true
 		m.eventType = core.ModelEventTypeCreate
 	case "UPDATE":
-		m.oldPk = c.OldRowID
+		m.oldPk = c.PKOldValues()[0]
 		m.eventType = core.ModelEventTypeUpdate
 	case "DELETE":
-		m.oldPk = c.OldRowID
+		m.oldPk = c.PKOldValues()[0]
 		m.eventType = core.ModelEventTypeDelete
 	default:
 		return nil
 	}
 	m.tableName = c.Table
-	m.pk = c.NewRowID
+	m.pk = c.PKNewValues()[0]
 	m.err = err
 	return &m
 }

@@ -67,7 +67,7 @@ Set up your environment variables to configure the cluster:
 | `PB_NATS_CONFIG`     | Path to a NATS configuration file (overrides other NATS settings).         | |
 | `PB_REPLICATION_URL` | NATS connection URL for replication (use if connecting to an external NATS server). Example: `nats://localhost:4222`. | |
 | `PB_REPLICATION_STREAM` | Stream name for data replication | pb |
-| `PB_ROW_IDENTIFY` | Strategy used to identify rows during replication. Options: `rowid` or `full`. | rowid |
+| `PB_ROW_IDENTIFY` | Strategy used to identify rows during replication. Options: `pk`, `rowid` or `full`. | pk |
 | `PB_STATIC_LEADER`| URL target to redirect all writer requests to the cluster leader | |
 | `PB_SUPERUSER_EMAIL` | Superuser email created at startup | |
 | `PB_SUPERUSER_PASS` | Superuser password created at startup | |
