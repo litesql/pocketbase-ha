@@ -13,11 +13,11 @@ import (
 
 	"github.com/litesql/go-ha"
 	sqliteha "github.com/litesql/go-sqlite-ha"
-	"github.com/litesql/sqlite"
 	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
+	"modernc.org/sqlite"
 )
 
 var (
