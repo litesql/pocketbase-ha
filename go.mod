@@ -6,7 +6,7 @@ require (
 	github.com/litesql/go-ha v0.2.2
 	github.com/litesql/go-sqlite-ha v0.2.2
 	github.com/pocketbase/dbx v1.11.0
-	github.com/pocketbase/pocketbase v0.34.1
+	github.com/pocketbase/pocketbase v0.34.2
 	modernc.org/sqlite v1.40.1
 )
 

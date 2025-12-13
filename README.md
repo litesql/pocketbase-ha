@@ -126,13 +126,39 @@ On replica nodes (the nodes that users do not directly interact with), only the 
 - OnModelAfterDeleteSuccess
 - OnModelAfterDeleteError
 
-### Data replication conflict resolution
+### Data Replication and Conflict Resolution
 
-By default, **PocketBase HA** uses a last-writer-wins approach for conflict resolution. You can modify the `ChangeSetInterceptor` to implement custom strategies tailored to your needs.
+**PocketBase HA** uses a last-writer-wins strategy for conflict resolution by default. To implement custom resolution strategies, modify the `ChangeSetInterceptor` in your code.
+
+For applications that require strict consistency, configure a cluster leader to handle all write operations and prevent conflicts entirely.
+
+### Configuring a Cluster Leader
+
+Set `PB_LOCAL_TARGET` or `PB_STATIC_LEADER` environment variables to designate a leader node that processes all write requests:
+
+
+#### Static Leader
+
+```sh
+export PB_STATIC_LEADER=http://leader-addr:8090
+```
+
+#### Dynamic Leader
+```sh
+export PB_LOCAL_TARGET=http://local-advertise-addr:8090
+```
+
+
+This ensures all mutations route through the leader while reads can be distributed across replica nodes.
+
+![write-path](./img/leader_write.png)
+
+![read-path](./img/leader_read.png)
 
 ## Contributing
 
 Contributions are welcome! Feel free to open issues or submit pull requests to improve this project.
+
 
 ## License
 
