@@ -1,5 +1,5 @@
 # PocketBase HA
-Highly Available Leader/Leaderless [PocketBase](https://pocketbase.io/) Cluster powered by `go-ha` [database/sql driver](https://github.com/litesql/go-ha).
+Highly Available Leader-based or Leaderless [PocketBase](https://pocketbase.io/) Cluster powered by `go-ha` [database/sql driver](https://github.com/litesql/go-ha).
 
 ## Features
 
@@ -130,9 +130,9 @@ On replica nodes (the nodes that users do not directly interact with), only the 
 
 **PocketBase HA** uses a last-writer-wins strategy for conflict resolution by default. To implement custom resolution strategies, modify the `ChangeSetInterceptor` in your code.
 
-For applications that require strict consistency, configure a cluster leader to handle all write operations and prevent conflicts entirely.
+For applications that require strict consistency, configure a leader-based cluster to handle all write operations and prevent conflicts entirely.
 
-### Configuring a Cluster Leader
+### Configuring a Leader-based Cluster
 
 Set `PB_LOCAL_TARGET` or `PB_STATIC_LEADER` environment variables to designate a leader node that processes all write requests:
 
