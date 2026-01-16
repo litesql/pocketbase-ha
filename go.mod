@@ -3,8 +3,8 @@ module github.com/litesql/pocketbase-ha
 go 1.25
 
 require (
-	github.com/litesql/go-ha v0.6.2
-	github.com/litesql/go-sqlite-ha v0.6.2
+	github.com/litesql/go-ha v0.5.7
+	github.com/litesql/go-sqlite-ha v0.5.7
 	github.com/pocketbase/dbx v1.11.0
 	github.com/pocketbase/pocketbase v0.35.1
 	modernc.org/sqlite v1.44.1
@@ -41,7 +41,6 @@ require (
 	github.com/ncruces/go-strftime v1.0.0 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/rogpeppe/go-internal v1.10.0 // indirect
-	github.com/rqlite/sql v0.0.0-20260116021722-655729ca2eff // indirect
 	github.com/spf13/cast v1.10.0 // indirect
 	github.com/spf13/cobra v1.10.2 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
