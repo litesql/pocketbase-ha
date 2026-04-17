@@ -7,16 +7,22 @@ import (
 	"log"
 	"log/slog"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/litesql/go-ha"
 	sqliteha "github.com/litesql/go-sqlite-ha"
+	"github.com/litesql/pocketbase-ha/cli"
 	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
+	"github.com/pocketbase/pocketbase/plugins/ghupdate"
+	"github.com/pocketbase/pocketbase/plugins/jsvm"
+	"github.com/pocketbase/pocketbase/plugins/migratecmd"
+	"github.com/pocketbase/pocketbase/tools/osutils"
 	"modernc.org/sqlite"
 )
 
@@ -35,7 +41,7 @@ func init() {
 			PRAGMA synchronous        = NORMAL;
 			PRAGMA foreign_keys       = ON;
 			PRAGMA temp_store         = MEMORY;
-			PRAGMA cache_size         = -16000;
+			PRAGMA cache_size         = -32000;
 		`, nil)
 
 			return err
@@ -111,6 +117,17 @@ func init() {
 		drv.Options = append(drv.Options, ha.WithLeaderElectionLocalTarget(redirect))
 	}
 
+	if grpcPort := os.Getenv("PB_GRPC_PORT"); grpcPort != "" {
+		port, err := strconv.Atoi(grpcPort)
+		if err != nil {
+			panic("invalid PB_GRPC_PORT value:" + err.Error())
+		}
+		drv.Options = append(drv.Options, ha.WithGrpcPort(port))
+	}
+	if grpcToken := os.Getenv("PB_GRPC_TOKEN"); grpcToken != "" {
+		drv.Options = append(drv.Options, ha.WithGrpcToken(grpcToken))
+	}
+
 	sql.Register("pb_ha", &drv)
 
 	dbx.BuilderFuncMap["pb_ha"] = dbx.BuilderFuncMap["sqlite"]
@@ -122,6 +139,93 @@ func main() {
 			return dbx.Open("pb_ha", dbPath)
 		},
 	})
+
+	var hooksDir string
+	app.RootCmd.PersistentFlags().StringVar(
+		&hooksDir,
+		"hooksDir",
+		"",
+		"the directory with the JS app hooks",
+	)
+
+	var hooksWatch bool
+	app.RootCmd.PersistentFlags().BoolVar(
+		&hooksWatch,
+		"hooksWatch",
+		true,
+		"auto restart the app on pb_hooks file change; it has no effect on Windows",
+	)
+
+	var hooksPool int
+	app.RootCmd.PersistentFlags().IntVar(
+		&hooksPool,
+		"hooksPool",
+		15,
+		"the total prewarm goja.Runtime instances for the JS app hooks execution",
+	)
+
+	var migrationsDir string
+	app.RootCmd.PersistentFlags().StringVar(
+		&migrationsDir,
+		"migrationsDir",
+		"",
+		"the directory with the user defined migrations",
+	)
+
+	var automigrate bool
+	app.RootCmd.PersistentFlags().BoolVar(
+		&automigrate,
+		"automigrate",
+		true,
+		"enable/disable auto migrations",
+	)
+
+	var publicDir string
+	app.RootCmd.PersistentFlags().StringVar(
+		&publicDir,
+		"publicDir",
+		defaultPublicDir(),
+		"the directory to serve static files",
+	)
+
+	var indexFallback bool
+	app.RootCmd.PersistentFlags().BoolVar(
+		&indexFallback,
+		"indexFallback",
+		true,
+		"fallback the request to index.html on missing static path, e.g. when pretty urls are used with SPA",
+	)
+
+	app.RootCmd.ParseFlags(os.Args[1:])
+
+	// ---------------------------------------------------------------
+	// Plugins and hooks:
+	// ---------------------------------------------------------------
+
+	// load jsvm (pb_hooks and pb_migrations)
+	jsvm.MustRegister(app, jsvm.Config{
+		MigrationsDir: migrationsDir,
+		HooksDir:      hooksDir,
+		HooksWatch:    hooksWatch,
+		HooksPoolSize: hooksPool,
+	})
+
+	// migrate command (with js templates)
+	migratecmd.MustRegister(app, app.RootCmd, migratecmd.Config{
+		TemplateLang: migratecmd.TemplateLangJS,
+		Automigrate:  automigrate,
+		Dir:          migrationsDir,
+	})
+
+	// GitHub selfupdate
+	ghupdate.MustRegister(app, app.RootCmd, ghupdate.Config{
+		Owner:             "litesql",
+		Repo:              "pocketbase-ha",
+		ArchiveExecutable: "pocketbase-ha",
+	})
+
+	// Remote access to database via gRPC
+	cli.Register(app.RootCmd)
 
 	app.OnServe().BindFunc(func(se *core.ServeEvent) error {
 		close(bootstrap)
@@ -329,4 +433,13 @@ func (m *Model) triggerAfterDelete(app core.App, event *core.ModelEvent) {
 		return
 	}
 	app.OnModelAfterDeleteSuccess().Trigger(event)
+}
+
+// the default pb_public dir location is relative to the executable
+func defaultPublicDir() string {
+	if osutils.IsProbablyGoRun() {
+		return "./pb_public"
+	}
+
+	return filepath.Join(os.Args[0], "../pb_public")
 }

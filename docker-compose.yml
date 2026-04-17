@@ -7,6 +7,7 @@ services:
     ports:
       - "4222:4222"
       - "8090:8090"
+      - "9090:9090"
     environment:
       - PB_NAME=node1
       - PB_NATS_CONFIG=/etc/nats/node1.cfg
@@ -14,6 +15,7 @@ services:
       - PB_LOCAL_TARGET=http://node1:8090
       - PB_SUPERUSER_EMAIL=test@example.com
       - PB_SUPERUSER_PASS=1234567890
+      - PB_GRPC_PORT=9090
 
   node2:
     image: ghcr.io/litesql/pocketbase-ha:latest
@@ -21,13 +23,15 @@ services:
       - ./testdata:/etc/nats
       - node2_data:/app/pb_data
     ports:
-      - "4223:4222"
+      - "4223:4222"      
       - "8091:8090"
+      - "9091:9090"
     environment:
       - PB_NAME=node2
       - PB_NATS_CONFIG=/etc/nats/node2.cfg
       - PB_REPLICAS=1
       - PB_LOCAL_TARGET=http://node2:8090
+      - PB_GRPC_PORT=9090
 
   node3:
     image: ghcr.io/litesql/pocketbase-ha:latest
@@ -37,11 +41,13 @@ services:
     ports:
       - "4224:4222"
       - "8092:8090"
+      - "9092:9090"
     environment:
       - PB_NAME=node3
       - PB_NATS_CONFIG=/etc/nats/node3.cfg
       - PB_REPLICAS=1
       - PB_LOCAL_TARGET=http://node3:8090
+      - PB_GRPC_PORT=9090
 
 volumes:
   node1_data:
