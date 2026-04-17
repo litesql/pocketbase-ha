@@ -9,6 +9,7 @@ require (
 	github.com/litesql/go-sqlite-ha v0.10.1
 	github.com/pocketbase/dbx v1.12.0
 	github.com/pocketbase/pocketbase v0.36.9
+	github.com/spf13/cobra v1.10.2
 	google.golang.org/grpc v1.80.0
 	modernc.org/sqlite v1.48.2
 )
@@ -72,7 +73,6 @@ require (
 	github.com/rqlite/sql v0.0.0-20260224021119-1b2524a41372 // indirect
 	github.com/sahilm/fuzzy v0.1.1 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
-	github.com/spf13/cobra v1.10.2 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	golang.org/x/crypto v0.50.0 // indirect
