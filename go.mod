@@ -5,7 +5,7 @@ go 1.25.0
 require (
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/knz/bubbline v0.0.0-20251201090646-433e881e9884
-	github.com/litesql/go-ha v0.10.8
+	github.com/litesql/go-ha v0.10.9
 	github.com/litesql/go-sqlite-ha v0.10.1
 	github.com/pocketbase/dbx v1.12.0
 	github.com/pocketbase/pocketbase v0.36.9
