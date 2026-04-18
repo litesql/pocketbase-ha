@@ -208,7 +208,7 @@ pocketbase-ha cli http://host:port
 # undo latest transaction
 undo;
 
-# undo N latest transactions
+# undo last N transactions
 undo N;
 
 # undo transactions since time. Ex: undo 5m; (5 minutes ago)
@@ -217,7 +217,7 @@ undo <time duration>;
 # show the latest transaction
 history;
 
-# show the N latest transactions
+# show the last N transactions
 history N;
 
 # show the transactions since time.
