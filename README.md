@@ -6,6 +6,7 @@ Highly Available Leader/Leaderless [PocketBase](https://pocketbase.io/) Cluster 
 - **High Availability**: Run multiple PocketBase instances in a leader or leaderless cluster.
 - **Replication**: Synchronize data across nodes using NATS.
 - **Embedded or External NATS**: Choose between an embedded NATS server or an external one for replication.
+- **Remote direct acces to Database**: via a secured gRPC endpoint for direct database access from remote clients. Use terminal or [DBeaver](https://github.com/litesql/jdbc-ha#dbeaver-integration).
 
 ## Prerequisites
 
@@ -156,6 +157,37 @@ This ensures all mutations route through the leader while reads can be distribut
 ![write-path](./img/leader_write.png)
 
 ![read-path](./img/leader_read.png)
+
+### Remote database access from terminal
+
+To enable remote access, set `PB_GRPC_PORT` before starting the service:
+
+```sh
+export PB_GRPC_PORT=9090
+pocketbase-ha serve
+```
+
+Then, from another terminal, connect with:
+
+```sh
+pocketbase-ha cli http://localhost:9090
+```
+
+#### Protect the connection with a token
+
+Set `PB_GRPC_TOKEN` to require authentication for remote gRPC access.
+
+```sh
+export PB_GRPC_PORT=9090
+export PB_GRPC_TOKEN=secret
+pocketbase-ha serve
+```
+
+Then, from another terminal, connect with:
+
+```sh
+pocketbase-ha cli http://localhost:9090 --token secret
+```
 
 ## Contributing
 
