@@ -6,7 +6,7 @@ Highly Available Leader/Leaderless [PocketBase](https://pocketbase.io/) Cluster 
 - **High Availability**: Run multiple PocketBase instances in a leader or leaderless cluster.
 - **Replication**: Synchronize data across nodes using NATS.
 - **Embedded or External NATS**: Choose between an embedded NATS server or an external one for replication.
-- **Remote direct acces to Database**: via a secured gRPC endpoint for direct database access from remote clients. Use terminal or [DBeaver](https://github.com/litesql/jdbc-ha#dbeaver-integration).
+- **Remote direct acces to Database**: via a secured gRPC endpoint for direct database access from remote clients. Use [terminal](#remote-database-access-from-terminal) or [DBeaver](https://github.com/litesql/jdbc-ha#dbeaver-integration).
 
 ## Prerequisites
 
