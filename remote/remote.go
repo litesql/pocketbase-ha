@@ -41,8 +41,9 @@ var (
 
 func Register(rootCmd *cobra.Command) error {
 	cmd := cobra.Command{
-		Use:   "remote URL",
-		Short: "Connect to a remote pocketbase database via gRPC",
+		Use:     "remote URL",
+		Aliases: []string{"cli"},
+		Short:   "Connect to a remote pocketbase database via gRPC",
 		Long: `Connect to a remote pocketbase database via gRPC.
 The URL should be in the format of "http://host:port" or "https://host:port". 
 Example:
