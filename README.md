@@ -173,6 +173,12 @@ Then, from another terminal, connect with:
 pocketbase-ha cli http://localhost:9090
 ```
 
+Then execute any SQL command:
+
+```sh
+data.db> SELECT * FROM PRAGMA_table_list;
+```
+
 #### Protect the connection with a token
 
 Set `PB_GRPC_TOKEN` to require authentication for remote gRPC access.
