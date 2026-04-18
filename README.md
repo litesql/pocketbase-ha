@@ -6,7 +6,7 @@ Highly Available Leader/Leaderless [PocketBase](https://pocketbase.io/) Cluster 
 - **High Availability**: Run multiple PocketBase instances in a leader or leaderless cluster.
 - **Replication**: Synchronize data across nodes using NATS.
 - **Embedded or External NATS**: Choose between an embedded NATS server or an external one for replication.
-- **Remote direct acces to Database**: via a secured gRPC endpoint for direct database access from remote clients. Use [terminal](#remote-database-access-from-terminal) or [DBeaver](https://github.com/litesql/jdbc-ha#dbeaver-integration).
+- **Remote direct access to Database**: via a secured gRPC endpoint for direct database access from remote clients. Use [terminal](#remote-database-access-from-terminal) or [DBeaver](https://github.com/litesql/jdbc-ha#dbeaver-integration).
 
 ## Prerequisites
 
@@ -63,6 +63,7 @@ Set up your environment variables to configure the cluster:
 | `PB_ASYNC_PUBLISHER_DIR` | Directory path for storing outbox messages used in asynchronous replication. |    |
 | `PB_GRPC_PORT` | TCP Port for the gRPC service to enable remote database access. | |
 | `PB_GRPC_TOKEN` | Authentication token for securing remote database access via gRPC. | |
+| `PB_LOCAL_HISTORY_MAX_AGE` | Local transactions history max age. Used in undo operations from CLI. Set to zero to disable _history.db | 24h |
 | `PB_LOCAL_TARGET`    | Specifies the service URL to redirect requests when this node is the leader. Useful for enabling leader election. | |
 | `PB_NAME`            | A unique name for the node. Defaults to the system's hostname if not provided. | $HOSTNAME |
 | `PB_NATS_PORT`       | Port for the embedded NATS server (use only if running an embedded NATS server). | |
@@ -193,6 +194,33 @@ Then, from another terminal, connect with:
 
 ```sh
 pocketbase-ha cli http://localhost:9090 --token secret
+```
+
+#### Undo transactions
+
+You can undo transactions using `pocketbase-ha cli` UNDO command:
+
+```sh
+# connect
+pocketbase-ha cli http://host:port
+
+# undo latest transaction
+undo;
+
+# undo N latest transactions
+undo N;
+
+# undo transactions since time. Ex: undo 5m; (5 minutes ago)
+undo <time duration>;
+
+# show the latest transaction
+history;
+
+# show the N latest transactions
+history N;
+
+# show the transactions since time.
+history <time duration>;
 ```
 
 ## Contributing

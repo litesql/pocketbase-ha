@@ -79,7 +79,7 @@ func init() {
 	} else if natsPort := os.Getenv("PB_NATS_PORT"); natsPort != "" {
 		port, err := strconv.Atoi(natsPort)
 		if err != nil {
-			panic("invalid PB_NATS_PORT value:" + err.Error())
+			panic("invalid PB_NATS_PORT value: " + err.Error())
 		}
 		embeddedNatsConfig = &ha.EmbeddedNatsConfig{
 			Port:     port,
@@ -89,7 +89,7 @@ func init() {
 	if replicas := os.Getenv("PB_REPLICAS"); replicas != "" {
 		replicasInt, err := strconv.Atoi(replicas)
 		if err != nil {
-			panic("invalid PB_REPLICAS value:" + err.Error())
+			panic("invalid PB_REPLICAS value: " + err.Error())
 		}
 		drv.Options = append(drv.Options, ha.WithReplicas(replicasInt))
 	}
@@ -120,12 +120,22 @@ func init() {
 	if grpcPort := os.Getenv("PB_GRPC_PORT"); grpcPort != "" {
 		port, err := strconv.Atoi(grpcPort)
 		if err != nil {
-			panic("invalid PB_GRPC_PORT value:" + err.Error())
+			panic("invalid PB_GRPC_PORT value: " + err.Error())
 		}
 		drv.Options = append(drv.Options, ha.WithGrpcPort(port))
 	}
 	if grpcToken := os.Getenv("PB_GRPC_TOKEN"); grpcToken != "" {
 		drv.Options = append(drv.Options, ha.WithGrpcToken(grpcToken))
+	}
+
+	if localHistoryMaxAge := os.Getenv("PB_LOCAL_HISTORY_MAX_AGE"); localHistoryMaxAge != "" {
+		maxAge, err := time.ParseDuration(localHistoryMaxAge)
+		if err != nil {
+			panic("invalid PB_LOCAL_HISTORY_MAX_AGE value: " + err.Error())
+		}
+		drv.Options = append(drv.Options, ha.WithLocalHistoryMaxAge(maxAge))
+	} else {
+		drv.Options = append(drv.Options, ha.WithLocalHistoryMaxAge(24*time.Hour))
 	}
 
 	sql.Register("pb_ha", &drv)
