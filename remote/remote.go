@@ -1,4 +1,4 @@
-package cli
+package remote
 
 import (
 	"context"
@@ -41,9 +41,9 @@ var (
 
 func Register(rootCmd *cobra.Command) error {
 	cmd := cobra.Command{
-		Use:   "cli URL",
-		Short: "Start a CLI to remote connect to the database via gRPC",
-		Long: `Start a CLI to remote connect to the database via gRPC.
+		Use:   "remote URL",
+		Short: "Connect to a remote pocketbase database via gRPC",
+		Long: `Connect to a remote pocketbase database via gRPC.
 The URL should be in the format of "http://host:port" or "https://host:port". 
 Example:
 
@@ -53,11 +53,11 @@ Start the server with gRPC enabled:
 
 Then you can connect to the database using the CLI:
 
-	pocketbase-ha cli http://localhost:9090
+	pocketbase-ha remote http://localhost:9090
 
 You can also specify an authentication token if the gRPC server requires authentication:
 	
-	pocketbase-ha cli http://localhost:9090 --token your_token_here
+	pocketbase-ha remote http://localhost:9090 --token your_token_here
 
 `,
 		Args: cobra.ExactArgs(1),

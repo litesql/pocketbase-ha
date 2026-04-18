@@ -14,7 +14,7 @@ import (
 
 	"github.com/litesql/go-ha"
 	sqliteha "github.com/litesql/go-sqlite-ha"
-	"github.com/litesql/pocketbase-ha/cli"
+	"github.com/litesql/pocketbase-ha/remote"
 	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/apis"
@@ -235,7 +235,7 @@ func main() {
 	})
 
 	// Remote access to database via gRPC
-	cli.Register(app.RootCmd)
+	remote.Register(app.RootCmd)
 
 	app.OnServe().BindFunc(func(se *core.ServeEvent) error {
 		close(bootstrap)

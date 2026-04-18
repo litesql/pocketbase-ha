@@ -172,7 +172,7 @@ pocketbase-ha serve
 Then, from another terminal, connect with:
 
 ```sh
-pocketbase-ha cli http://localhost:9090
+pocketbase-ha remote http://localhost:9090
 ```
 
 Then execute any SQL command:
@@ -194,7 +194,7 @@ pocketbase-ha serve
 Then, from another terminal, connect with:
 
 ```sh
-pocketbase-ha cli http://localhost:9090 --token secret
+pocketbase-ha remote http://localhost:9090 --token secret
 ```
 
 #### Undo transactions
@@ -203,7 +203,7 @@ You can undo transactions using `pocketbase-ha cli` UNDO command:
 
 ```sh
 # connect
-pocketbase-ha cli http://host:port
+pocketbase-ha remote http://host:port
 
 # undo latest transaction
 undo;
