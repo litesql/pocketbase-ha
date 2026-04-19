@@ -42,8 +42,8 @@ github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/disintegration/imaging v1.6.2 h1:w1LecBlG2Lnp8B3jk5zSuNqd7b4DXhcjwek1ei82L+c=
 github.com/disintegration/imaging v1.6.2/go.mod h1:44/5580QXChDfwIclfc/PCwrr44amcmDAg8hxG0Ewe4=
-github.com/dlclark/regexp2 v1.11.5 h1:Q/sSnsKerHeCkc/jSTNq1oCm7KiVgUMZRDUoRu0JQZQ=
-github.com/dlclark/regexp2 v1.11.5/go.mod h1:DHkYz0B9wPfa6wondMfaivmHpzrQ3v9q8cnmRbL6yW8=
+github.com/dlclark/regexp2 v1.12.0 h1:0j4c5qQmnC6XOWNjP3PIXURXN2gWx76rd3KvgdPkCz8=
+github.com/dlclark/regexp2 v1.12.0/go.mod h1:DHkYz0B9wPfa6wondMfaivmHpzrQ3v9q8cnmRbL6yW8=
 github.com/domodwyer/mailyak/v3 v3.6.2 h1:x3tGMsyFhTCaxp6ycgR0FE/bu5QiNp+hetUuCOBXMn8=
 github.com/domodwyer/mailyak/v3 v3.6.2/go.mod h1:lOm/u9CyCVWHeaAmHIdF4RiKVxKUT/H5XX10lIKAL6c=
 github.com/dop251/base64dec v0.0.0-20231022112746-c6c9f9a96217 h1:16iT9CBDOniJwFGPI41MbUDfEk74hFaKTqudrX8kenY=
@@ -111,8 +111,8 @@ github.com/kylelemons/godebug v1.1.0 h1:RPNrshWIDI6G2gRW9EHilWtl7Z6Sb1BR0xunSBf0
 github.com/kylelemons/godebug v1.1.0/go.mod h1:9/0rRGxNHcop5bhtWyNeEfOS8JIWk580+fNqagV/RAw=
 github.com/litesql/go-ha v0.10.10 h1:MKNZsbrh2PzO6u1LmoU1ayXZyr9GMkLfYpfYeI4DxYQ=
 github.com/litesql/go-ha v0.10.10/go.mod h1:krMx03VIl7CWqCuaovmfsMpHRvI9s5X2N9EYT5JyLGw=
-github.com/litesql/go-sqlite-ha v0.10.1 h1:Dr+qCP/2Bh5XZsfX7zBkj0nykYj+XjNEa0gy6EoHFM4=
-github.com/litesql/go-sqlite-ha v0.10.1/go.mod h1:hQV53fNIi9OXIKXBvHUtDSyuWUeqwFBz15kHg/cm9Jc=
+github.com/litesql/go-sqlite-ha v0.10.10 h1:TYp3Mdy3Cp++yYcArZbZvUS630KXYmGvXrCfXcZzm8U=
+github.com/litesql/go-sqlite-ha v0.10.10/go.mod h1:ho7Dbupv0GidGblK/SLmnvyW7Xy0XDkjS5pnU1yQfew=
 github.com/lucasb-eyer/go-colorful v1.4.0 h1:UtrWVfLdarDgc44HcS7pYloGHJUjHV/4FwW4TvVgFr4=
 github.com/lucasb-eyer/go-colorful v1.4.0/go.mod h1:R4dSotOR9KMtayYi1e77YzuveK+i7ruzyGqttikkLy0=
 github.com/mattn/go-colorable v0.1.14 h1:9A9LHSqF/7dyVVX6g0U9cwm9pG3kP9gSzcuIPHPsaIE=
@@ -152,8 +152,8 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/pocketbase/dbx v1.12.0 h1:/oLErM+A0b4xI0PWTGPqSDVjzix48PqI/bng2l0PzoA=
 github.com/pocketbase/dbx v1.12.0/go.mod h1:xXRCIAKTHMgUCyCKZm55pUOdvFziJjQfXaWKhu2vhMs=
-github.com/pocketbase/pocketbase v0.36.9 h1:x3mXMB4AwhTzJ34JZpZR7IQyUih7Fx1l86r0V/k4oW8=
-github.com/pocketbase/pocketbase v0.36.9/go.mod h1:t3sMcAxGHrDAXNcZ+65cZxBMpFP1vBdI9DrghB4n5Gw=
+github.com/pocketbase/pocketbase v0.37.1 h1:C1jPYGsP3TsY/EZcvwftIj5DrHujq7XqYXRMA7EIZCY=
+github.com/pocketbase/pocketbase v0.37.1/go.mod h1:IJWkP7/6VosFIwrYgdeXglkNtpxvrsvyBUSpJjRbd7s=
 github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec h1:W09IVJc94icq4NjY3clb7Lk8O1qJ8BdBEF8z0ibU0rE=
 github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec/go.mod h1:qqbHyh8v60DhA7CoWK5oRCqLrMHRGoxYCSS9EjAz6Eo=
 github.com/rivo/uniseg v0.1.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=

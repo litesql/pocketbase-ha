@@ -6,9 +6,9 @@ require (
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/knz/bubbline v0.0.0-20251201090646-433e881e9884
 	github.com/litesql/go-ha v0.10.10
-	github.com/litesql/go-sqlite-ha v0.10.1
+	github.com/litesql/go-sqlite-ha v0.10.10
 	github.com/pocketbase/dbx v1.12.0
-	github.com/pocketbase/pocketbase v0.36.9
+	github.com/pocketbase/pocketbase v0.37.1
 	github.com/spf13/cobra v1.10.2
 	google.golang.org/grpc v1.80.0
 	modernc.org/sqlite v1.49.1
@@ -29,7 +29,7 @@ require (
 	github.com/clipperhouse/displaywidth v0.11.0 // indirect
 	github.com/clipperhouse/uax29/v2 v2.7.0 // indirect
 	github.com/disintegration/imaging v1.6.2 // indirect
-	github.com/dlclark/regexp2 v1.11.5 // indirect
+	github.com/dlclark/regexp2 v1.12.0 // indirect
 	github.com/domodwyer/mailyak/v3 v3.6.2 // indirect
 	github.com/dop251/base64dec v0.0.0-20231022112746-c6c9f9a96217 // indirect
 	github.com/dop251/goja v0.0.0-20260311135729-065cd970411c // indirect
