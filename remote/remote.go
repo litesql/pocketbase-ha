@@ -22,8 +22,10 @@ import (
 	haconnect "github.com/litesql/go-ha/connect"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/status"
 )
 
 var reSetDatabase = regexp.MustCompile(`(?i)^SET\s+DATABASE\s*(=|TO)\s*([^;\s]+)`)
@@ -42,7 +44,7 @@ var (
 func Register(rootCmd *cobra.Command) error {
 	cmd := cobra.Command{
 		Use:     "remote URL",
-		Aliases: []string{"cli"},
+		Aliases: []string{"cli", "sqlite"},
 		Short:   "Connect to a remote pocketbase database via gRPC",
 		Long: `Connect to a remote pocketbase database via gRPC.
 The URL should be in the format of "http://host:port" or "https://host:port". 
@@ -122,7 +124,9 @@ func Start(remote string, token string, replicationID string) {
 				err := stream.Send(req)
 				if err != nil {
 					m.Close()
-					slog.Error(err.Error())
+					if !errors.Is(err, io.EOF) {
+						slog.Error(err.Error())
+					}
 					exitChan <- struct{}{}
 					return
 				}
@@ -132,7 +136,9 @@ func Start(remote string, token string, replicationID string) {
 				})
 				if err != nil {
 					m.Close()
-					slog.Error(err.Error())
+					if !errors.Is(err, io.EOF) {
+						slog.Error(err.Error())
+					}
 					exitChan <- struct{}{}
 					return
 				}
@@ -146,7 +152,10 @@ func Start(remote string, token string, replicationID string) {
 			res, err := stream.Recv()
 			if err != nil {
 				m.Close()
-				slog.Error(err.Error())
+				st, ok := status.FromError(err)
+				if ok && st.Code() != codes.Canceled && st.Message() != "EOF" {
+					slog.Error(err.Error())
+				}
 				exitChan <- struct{}{}
 				return
 			}
@@ -172,7 +181,7 @@ func Start(remote string, token string, replicationID string) {
 
 			line, err := m.GetLine()
 			if err != nil {
-				if err == io.EOF {
+				if errors.Is(err, io.EOF) {
 					return
 				}
 				if errors.Is(err, bubbline.ErrInterrupted) {

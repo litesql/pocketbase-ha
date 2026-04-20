@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/litesql/go-ha"
-	sqliteha "github.com/litesql/go-sqlite-ha"
 	"github.com/litesql/pocketbase-ha/remote"
 	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase"
@@ -23,7 +22,6 @@ import (
 	"github.com/pocketbase/pocketbase/plugins/jsvm"
 	"github.com/pocketbase/pocketbase/plugins/migratecmd"
 	"github.com/pocketbase/pocketbase/tools/osutils"
-	"modernc.org/sqlite"
 )
 
 var (
@@ -32,26 +30,11 @@ var (
 )
 
 func init() {
-	drv := sqliteha.Driver{
-		ConnectionHook: func(conn sqlite.ExecQuerierContext, dsn string) error {
-			_, err := conn.ExecContext(context.Background(), `
-			PRAGMA busy_timeout       = 10000;
-			PRAGMA journal_mode       = WAL;
-			PRAGMA journal_size_limit = 200000000;
-			PRAGMA synchronous        = NORMAL;
-			PRAGMA foreign_keys       = ON;
-			PRAGMA temp_store         = MEMORY;
-			PRAGMA cache_size         = -32000;
-		`, nil)
-
-			return err
-		},
-		Options: []ha.Option{
-			ha.WithName(os.Getenv("PB_NAME")),
-			ha.WithReplicationURL(os.Getenv("PB_REPLICATION_URL")),
-			ha.WithWaitFor(bootstrap),
-			ha.WithChangeSetInterceptor(interceptor),
-		},
+	drv.Options = []ha.Option{
+		ha.WithName(os.Getenv("PB_NAME")),
+		ha.WithReplicationURL(os.Getenv("PB_REPLICATION_URL")),
+		ha.WithWaitFor(bootstrap),
+		ha.WithChangeSetInterceptor(interceptor),
 	}
 
 	if async := os.Getenv("PB_ASYNC_PUBLISHER"); async != "" {

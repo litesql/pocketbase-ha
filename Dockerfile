@@ -8,7 +8,7 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=0 go build -o pocketbase-ha .
+RUN go build -o pocketbase-ha .
 
 # Production image
 FROM debian:trixie-slim AS production
