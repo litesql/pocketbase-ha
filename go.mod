@@ -5,12 +5,12 @@ go 1.25.0
 require (
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/knz/bubbline v0.0.0-20251201090646-433e881e9884
-	github.com/litesql/go-ha v0.10.10
-	github.com/litesql/go-sqlite-ha v0.10.10
+	github.com/litesql/go-ha v0.11.0
+	github.com/litesql/go-sqlite-ha v0.11.0
 	github.com/litesql/go-sqlite3 v1.14.45
-	github.com/litesql/go-sqlite3-ha v0.10.10
+	github.com/litesql/go-sqlite3-ha v0.11.0
 	github.com/pocketbase/dbx v1.12.0
-	github.com/pocketbase/pocketbase v0.37.2
+	github.com/pocketbase/pocketbase v0.37.3
 	github.com/spf13/cobra v1.10.2
 	google.golang.org/grpc v1.80.0
 	modernc.org/sqlite v1.49.1
