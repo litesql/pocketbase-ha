@@ -111,14 +111,14 @@ func init() {
 		drv.Options = append(drv.Options, ha.WithGrpcToken(grpcToken))
 	}
 
-	if localHistoryMaxAge := os.Getenv("PB_LOCAL_HISTORY_MAX_AGE"); localHistoryMaxAge != "" {
+	if localHistoryMaxAge := os.Getenv("PB_STREAM_MAX_AGE"); localHistoryMaxAge != "" {
 		maxAge, err := time.ParseDuration(localHistoryMaxAge)
 		if err != nil {
-			panic("invalid PB_LOCAL_HISTORY_MAX_AGE value: " + err.Error())
+			panic("invalid PB_STREAM_MAX_AGE value: " + err.Error())
 		}
-		drv.Options = append(drv.Options, ha.WithLocalHistoryMaxAge(maxAge))
+		drv.Options = append(drv.Options, ha.WithStreamMaxAge(maxAge))
 	} else {
-		drv.Options = append(drv.Options, ha.WithLocalHistoryMaxAge(24*time.Hour))
+		drv.Options = append(drv.Options, ha.WithStreamMaxAge(72*time.Hour))
 	}
 
 	sql.Register("pb_ha", &drv)

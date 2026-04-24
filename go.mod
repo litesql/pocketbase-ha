@@ -5,10 +5,10 @@ go 1.25.0
 require (
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/knz/bubbline v0.0.0-20251201090646-433e881e9884
-	github.com/litesql/go-ha v0.11.0
-	github.com/litesql/go-sqlite-ha v0.11.0
+	github.com/litesql/go-ha v0.11.1
+	github.com/litesql/go-sqlite-ha v0.11.1
 	github.com/litesql/go-sqlite3 v1.14.45
-	github.com/litesql/go-sqlite3-ha v0.11.0
+	github.com/litesql/go-sqlite3-ha v0.11.1
 	github.com/pocketbase/dbx v1.12.0
 	github.com/pocketbase/pocketbase v0.37.3
 	github.com/spf13/cobra v1.10.2
@@ -86,7 +86,7 @@ require (
 	golang.org/x/time v0.15.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260420184626-e10c466a9529 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
-	modernc.org/libc v1.72.0 // indirect
+	modernc.org/libc v1.72.1 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.11.0 // indirect
 )
