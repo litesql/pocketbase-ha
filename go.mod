@@ -5,12 +5,12 @@ go 1.25.0
 require (
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/knz/bubbline v0.0.0-20251201090646-433e881e9884
-	github.com/litesql/go-ha v0.11.2
-	github.com/litesql/go-sqlite-ha v0.11.2
-	github.com/litesql/go-sqlite3 v1.14.45
-	github.com/litesql/go-sqlite3-ha v0.11.2
+	github.com/litesql/go-ha v0.11.3
+	github.com/litesql/go-sqlite-ha v0.11.3
+	github.com/litesql/go-sqlite3 v1.14.46
+	github.com/litesql/go-sqlite3-ha v0.11.3
 	github.com/pocketbase/dbx v1.12.0
-	github.com/pocketbase/pocketbase v0.37.3
+	github.com/pocketbase/pocketbase v0.37.4
 	github.com/spf13/cobra v1.10.2
 	google.golang.org/grpc v1.80.0
 	modernc.org/sqlite v1.50.0
@@ -54,7 +54,7 @@ require (
 	github.com/klauspost/compress v1.18.5 // indirect
 	github.com/lucasb-eyer/go-colorful v1.4.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
-	github.com/mattn/go-isatty v0.0.21 // indirect
+	github.com/mattn/go-isatty v0.0.22 // indirect
 	github.com/mattn/go-localereader v0.0.1 // indirect
 	github.com/mattn/go-runewidth v0.0.23 // indirect
 	github.com/minio/highwayhash v1.0.4 // indirect
@@ -64,7 +64,7 @@ require (
 	github.com/muesli/termenv v0.16.0 // indirect
 	github.com/nats-io/graft v0.0.0-20260325174230-f9e6710ae36e // indirect
 	github.com/nats-io/jwt/v2 v2.8.1 // indirect
-	github.com/nats-io/nats-server/v2 v2.12.7 // indirect
+	github.com/nats-io/nats-server/v2 v2.12.8 // indirect
 	github.com/nats-io/nats.go v1.51.0 // indirect
 	github.com/nats-io/nkeys v0.4.15 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
@@ -84,7 +84,7 @@ require (
 	golang.org/x/sys v0.43.0 // indirect
 	golang.org/x/text v0.36.0 // indirect
 	golang.org/x/time v0.15.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260420184626-e10c466a9529 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260427160629-7cedc36a6bc4 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 	modernc.org/libc v1.72.1 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
