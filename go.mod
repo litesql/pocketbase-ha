@@ -5,19 +5,19 @@ go 1.25.0
 require (
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/knz/bubbline v0.0.0-20251201090646-433e881e9884
-	github.com/litesql/go-ha v0.11.12
+	github.com/litesql/go-ha v0.11.13
 	github.com/litesql/go-sqlite-ha v0.11.12
 	github.com/litesql/go-sqlite3 v1.14.46
 	github.com/litesql/go-sqlite3-ha v0.11.11
 	github.com/pocketbase/dbx v1.12.0
-	github.com/pocketbase/pocketbase v0.38.1
+	github.com/pocketbase/pocketbase v0.38.2
 	github.com/spf13/cobra v1.10.2
 	google.golang.org/grpc v1.81.1
 	modernc.org/sqlite v1.50.1
 )
 
 require (
-	connectrpc.com/connect v1.19.2 // indirect
+	connectrpc.com/connect v1.20.0 // indirect
 	github.com/antithesishq/antithesis-sdk-go v0.7.0 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
 	github.com/atotto/clipboard v0.1.4 // indirect
@@ -64,7 +64,7 @@ require (
 	github.com/muesli/termenv v0.16.0 // indirect
 	github.com/nats-io/graft v0.0.0-20260325174230-f9e6710ae36e // indirect
 	github.com/nats-io/jwt/v2 v2.8.1 // indirect
-	github.com/nats-io/nats-server/v2 v2.14.0 // indirect
+	github.com/nats-io/nats-server/v2 v2.14.1 // indirect
 	github.com/nats-io/nats.go v1.52.0 // indirect
 	github.com/nats-io/nkeys v0.4.15 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
@@ -76,17 +76,17 @@ require (
 	github.com/spf13/cast v1.10.0 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
-	golang.org/x/crypto v0.51.0 // indirect
-	golang.org/x/image v0.40.0 // indirect
-	golang.org/x/net v0.54.0 // indirect
+	golang.org/x/crypto v0.52.0 // indirect
+	golang.org/x/image v0.41.0 // indirect
+	golang.org/x/net v0.55.0 // indirect
 	golang.org/x/oauth2 v0.36.0 // indirect
 	golang.org/x/sync v0.20.0 // indirect
-	golang.org/x/sys v0.44.0 // indirect
+	golang.org/x/sys v0.45.0 // indirect
 	golang.org/x/text v0.37.0 // indirect
 	golang.org/x/time v0.15.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260511170946-3700d4141b60 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260523011958-0a33c5d7ca68 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
-	modernc.org/libc v1.72.3 // indirect
+	modernc.org/libc v1.72.4 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.11.0 // indirect
 )
