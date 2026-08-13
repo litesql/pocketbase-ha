@@ -1,6 +1,8 @@
 services:
   node1:
-    image: ghcr.io/litesql/pocketbase-ha:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
     volumes:
       - ./testdata:/etc/nats
       - node1_data:/app/pb_data
@@ -18,12 +20,14 @@ services:
       - PB_GRPC_PORT=9090
 
   node2:
-    image: ghcr.io/litesql/pocketbase-ha:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
     volumes:
       - ./testdata:/etc/nats
       - node2_data:/app/pb_data
     ports:
-      - "4223:4222"      
+      - "4223:4222"
       - "8091:8090"
       - "9091:9090"
     environment:
@@ -34,7 +38,9 @@ services:
       - PB_GRPC_PORT=9090
 
   node3:
-    image: ghcr.io/litesql/pocketbase-ha:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
     volumes:
       - ./testdata:/etc/nats
       - node3_data:/app/pb_data
