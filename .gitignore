@@ -1,2 +1,8 @@
 # Added by goreleaser init:
 dist/
+
+# Local Node realtime harness (not part of the Go binary)
+test/
+
+# oh-my-claudecode session state
+.omc/
