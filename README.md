@@ -9,6 +9,16 @@ Highly Available Leader/Leaderless [PocketBase](https://pocketbase.io/) Cluster 
 - **Remote direct access to Database**: via a secured gRPC endpoint for direct database access from remote clients. Use [terminal](#remote-database-access-from-terminal) or [DBeaver](https://github.com/litesql/jdbc-ha#dbeaver-integration).
 - **Undo transactions**: Use `pocketbase-ha cli` (or any gRPC client) to execute [UNDO](#undo-transactions) commands on already commited transactions. 
 
+## Architecture
+
+`pocketbase-ha` is a thin PocketBase binary. Cluster wiring lives under `internal/`:
+
+- `internal/config` — `PB_*` environment
+- `internal/hadriver` — `go-ha` SQL driver registration
+- `internal/realtime` — replica CDC to PocketBase model events
+- `internal/cluster` — leader routing and local `/api/realtime`
+- `internal/server` — composition root; extra capabilities implement `internal/feature.Feature` and are registered there
+
 ## Prerequisites
 
 - **Go**: Version `1.25` or later is required.
