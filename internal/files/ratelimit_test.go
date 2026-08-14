@@ -21,6 +21,34 @@ func TestFileRateLimiterAllow(t *testing.T) {
 	}
 }
 
+func TestFileRateLimiterDropsIdleKeys(t *testing.T) {
+	var l fileRateLimiter
+	if !l.allow("k", 1, time.Minute) {
+		t.Fatal("first must be allowed")
+	}
+	if l.allow("k", 1, time.Minute) {
+		t.Fatal("second must be denied")
+	}
+	l.clean(time.Now().Add(2 * time.Minute))
+	if !l.allow("k", 1, time.Minute) {
+		t.Fatal("idle key must expire so the next request is allowed")
+	}
+}
+
+func TestFileRateLimiterKeepsActiveKeys(t *testing.T) {
+	var l fileRateLimiter
+	if !l.allow("k", 2, time.Minute) {
+		t.Fatal("first must be allowed")
+	}
+	l.clean(time.Now())
+	if !l.allow("k", 2, time.Minute) {
+		t.Fatal("in-window hit must survive clean")
+	}
+	if l.allow("k", 2, time.Minute) {
+		t.Fatal("third must still be denied")
+	}
+}
+
 func TestCheckCollectionFileRateLimit(t *testing.T) {
 	app := testApp(t)
 	col, err := app.FindCachedCollectionByNameOrId("demo1")

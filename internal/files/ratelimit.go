@@ -7,9 +7,17 @@ import (
 	"github.com/pocketbase/pocketbase/core"
 )
 
+const rateLimitCleanInterval = 30 * time.Minute
+
+type rateHits struct {
+	times  []time.Time
+	window time.Duration
+}
+
 type fileRateLimiter struct {
-	mu   sync.Mutex
-	hits map[string][]time.Time
+	mu        sync.Mutex
+	hits      map[string]*rateHits
+	lastClean time.Time
 }
 
 func (l *fileRateLimiter) allow(key string, max int, window time.Duration) bool {
@@ -22,23 +30,64 @@ func (l *fileRateLimiter) allow(key string, max int, window time.Duration) bool 
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	if l.hits == nil {
-		l.hits = map[string][]time.Time{}
+		l.hits = map[string]*rateHits{}
 	}
-	times := l.hits[key]
+	b := l.hits[key]
+	if b == nil {
+		b = &rateHits{}
+		l.hits[key] = b
+	}
+	b.window = window
 	n := 0
-	for _, ts := range times {
+	for _, ts := range b.times {
 		if ts.After(cutoff) {
-			times[n] = ts
+			b.times[n] = ts
 			n++
 		}
 	}
-	times = times[:n]
-	if len(times) >= max {
-		l.hits[key] = times
-		return false
+	b.times = b.times[:n]
+	allowed := len(b.times) < max
+	if allowed {
+		b.times = append(b.times, now)
 	}
-	l.hits[key] = append(times, now)
-	return true
+	l.maybeCleanLocked(now)
+	return allowed
+}
+
+func (l *fileRateLimiter) clean(now time.Time) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	l.cleanLocked(now)
+}
+
+func (l *fileRateLimiter) maybeCleanLocked(now time.Time) {
+	if !l.lastClean.IsZero() && now.Sub(l.lastClean) < rateLimitCleanInterval {
+		return
+	}
+	l.cleanLocked(now)
+}
+
+func (l *fileRateLimiter) cleanLocked(now time.Time) {
+	l.lastClean = now
+	for k, b := range l.hits {
+		if b == nil || b.window <= 0 {
+			delete(l.hits, k)
+			continue
+		}
+		cutoff := now.Add(-b.window)
+		n := 0
+		for _, ts := range b.times {
+			if ts.After(cutoff) {
+				b.times[n] = ts
+				n++
+			}
+		}
+		if n == 0 {
+			delete(l.hits, k)
+			continue
+		}
+		b.times = b.times[:n]
+	}
 }
 
 func (f *Feature) checkCollectionFileRateLimit(e *core.RequestEvent, collection *core.Collection) error {

@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/litesql/go-ha"
 	"github.com/litesql/pocketbase-ha/internal/config"
@@ -65,6 +66,9 @@ func (f *Feature) Register(app core.App) error {
 		f.snapshotS3(se.App)
 		se.Router.BindFunc(f.replicaFileProxy)
 		return se.Next()
+	})
+	_ = app.Cron().Add("pbhaFileRateLimitCleanup", "2 * * * *", func() {
+		f.limiter.clean(time.Now())
 	})
 
 	return nil
