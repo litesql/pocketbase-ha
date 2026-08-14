@@ -8,6 +8,7 @@ import (
 	"github.com/litesql/pocketbase-ha/internal/cluster"
 	"github.com/litesql/pocketbase-ha/internal/config"
 	"github.com/litesql/pocketbase-ha/internal/feature"
+	"github.com/litesql/pocketbase-ha/internal/files"
 	"github.com/litesql/pocketbase-ha/internal/hadriver"
 	"github.com/litesql/pocketbase-ha/internal/realtime"
 	"github.com/litesql/pocketbase-ha/remote"
@@ -115,9 +116,10 @@ func New(cfg config.Config) (*pocketbase.PocketBase, error) {
 
 	interceptor.SetApp(app)
 
+	cl := cluster.New(cfg, bootstrap)
 	features := []feature.Feature{
-		cluster.New(cfg, bootstrap),
-		// later: files.New(cfg), backup.New(cfg)
+		cl,
+		files.New(cfg, cl),
 	}
 	for _, f := range features {
 		if err := f.Register(app); err != nil {

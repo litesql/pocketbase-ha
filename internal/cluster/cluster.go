@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/litesql/go-ha"
@@ -23,6 +24,9 @@ var _ feature.Feature = (*Feature)(nil)
 type Feature struct {
 	cfg       config.Config
 	bootstrap chan struct{}
+
+	mu     sync.Mutex
+	leader ha.LeaderProvider
 }
 
 func New(cfg config.Config, bootstrap chan struct{}) *Feature {
@@ -49,10 +53,12 @@ func (f *Feature) Register(app core.App) error {
 		if !ok {
 			return fmt.Errorf("connector not found")
 		}
+		leader := connector.LeaderProvider()
+		f.setLeader(leader)
 		slog.Info("waiting for the leader")
-		<-connector.LeaderProvider().Ready()
+		<-leader.Ready()
 
-		if connector.LeaderProvider().IsLeader() {
+		if leader.IsLeader() {
 			// force sync token definition
 			_, err := app.ConcurrentDB().Update("_collections",
 				dbx.Params{"updated": time.Now().Format("2006-01-02 15:04:05.000Z")},
@@ -72,6 +78,22 @@ func (f *Feature) Register(app core.App) error {
 		return se.Next()
 	})
 	return nil
+}
+
+// LeaderProvider returns the data.db leader once OnServe has resolved it.
+func (f *Feature) LeaderProvider() ha.LeaderProvider {
+	if f == nil {
+		return nil
+	}
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	return f.leader
+}
+
+func (f *Feature) setLeader(leader ha.LeaderProvider) {
+	f.mu.Lock()
+	f.leader = leader
+	f.mu.Unlock()
 }
 
 func upsertSuperuser(app core.App, email, pass string) error {

@@ -30,26 +30,34 @@ func TestParseDefaults(t *testing.T) {
 	if cfg.GRPCPort != nil {
 		t.Fatalf("GRPCPort = %v, want nil", cfg.GRPCPort)
 	}
+	if cfg.FileCacheDir != "" {
+		t.Fatalf("FileCacheDir = %q, want empty", cfg.FileCacheDir)
+	}
+	if cfg.FileCacheSizeBytes != 0 {
+		t.Fatalf("FileCacheSizeBytes = %d, want 0", cfg.FileCacheSizeBytes)
+	}
 }
 
 func TestParseAllEnv(t *testing.T) {
 	env := map[string]string{
-		"PB_NAME":                "node1",
-		"PB_REPLICATION_URL":     "nats://localhost:4222",
-		"PB_ASYNC_PUBLISHER":     "true",
-		"PB_ASYNC_PUBLISHER_DIR": "/tmp/outbox",
-		"PB_REPLICATION_STREAM":  "custom",
-		"PB_NATS_PORT":           "4222",
-		"PB_NATS_STORE_DIR":      "/tmp/nats",
-		"PB_REPLICAS":            "1",
-		"PB_ROW_IDENTIFY":        "rowid",
-		"PB_STATIC_LEADER":       "http://leader:8090",
-		"PB_LOCAL_TARGET":        "http://node1:8090",
-		"PB_GRPC_PORT":           "9090",
-		"PB_GRPC_TOKEN":          "secret",
-		"PB_STREAM_MAX_AGE":      "1h",
-		"PB_SUPERUSER_EMAIL":     "test@example.com",
-		"PB_SUPERUSER_PASS":      "password",
+		"PB_NAME":                 "node1",
+		"PB_REPLICATION_URL":      "nats://localhost:4222",
+		"PB_ASYNC_PUBLISHER":      "true",
+		"PB_ASYNC_PUBLISHER_DIR":  "/tmp/outbox",
+		"PB_REPLICATION_STREAM":   "custom",
+		"PB_NATS_PORT":            "4222",
+		"PB_NATS_STORE_DIR":       "/tmp/nats",
+		"PB_REPLICAS":             "1",
+		"PB_ROW_IDENTIFY":         "rowid",
+		"PB_STATIC_LEADER":        "http://leader:8090",
+		"PB_LOCAL_TARGET":         "http://node1:8090",
+		"PB_GRPC_PORT":            "9090",
+		"PB_GRPC_TOKEN":           "secret",
+		"PB_STREAM_MAX_AGE":       "1h",
+		"PB_SUPERUSER_EMAIL":      "test@example.com",
+		"PB_SUPERUSER_PASS":       "password",
+		"PB_FILECACHE_DIR":        "/tmp/filecache",
+		"PB_FILECACHE_SIZE_BYTES": "1048576",
 	}
 
 	cfg, err := Parse(mapGetenv(env))
@@ -99,6 +107,12 @@ func TestParseAllEnv(t *testing.T) {
 	if cfg.SuperuserEmail != "test@example.com" || cfg.SuperuserPass != "password" {
 		t.Fatalf("superuser = %q / %q", cfg.SuperuserEmail, cfg.SuperuserPass)
 	}
+	if cfg.FileCacheDir != "/tmp/filecache" {
+		t.Fatalf("FileCacheDir = %q", cfg.FileCacheDir)
+	}
+	if cfg.FileCacheSizeBytes != 1048576 {
+		t.Fatalf("FileCacheSizeBytes = %d", cfg.FileCacheSizeBytes)
+	}
 }
 
 func TestParseNATSConfigFileOverridesPort(t *testing.T) {
@@ -130,6 +144,8 @@ func TestParseInvalidValues(t *testing.T) {
 		{"row identify", map[string]string{"PB_ROW_IDENTIFY": "guid"}, "invalid PB_ROW_IDENTIFY"},
 		{"grpc port", map[string]string{"PB_GRPC_PORT": "nope"}, "invalid PB_GRPC_PORT"},
 		{"stream max age", map[string]string{"PB_STREAM_MAX_AGE": "forever"}, "invalid PB_STREAM_MAX_AGE"},
+		{"file cache size", map[string]string{"PB_FILECACHE_SIZE_BYTES": "nope"}, "invalid PB_FILECACHE_SIZE_BYTES"},
+		{"negative file cache size", map[string]string{"PB_FILECACHE_SIZE_BYTES": "-1"}, "invalid PB_FILECACHE_SIZE_BYTES"},
 	}
 
 	for _, tt := range tests {
