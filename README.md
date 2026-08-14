@@ -1,4 +1,7 @@
 # PocketBase HA
+
+> This is a fork of [pocketbase-ha](https://github.com/litesql/pocketbase-ha) with some additional features and fixes.
+
 Highly Available Leader/Leaderless [PocketBase](https://pocketbase.io/) Cluster powered by `go-ha` [database/sql driver](https://github.com/litesql/go-ha).
 
 ## Features
@@ -7,7 +10,7 @@ Highly Available Leader/Leaderless [PocketBase](https://pocketbase.io/) Cluster 
 - **Replication**: Synchronize data across nodes using NATS.
 - **Embedded or External NATS**: Choose between an embedded NATS server or an external one for replication.
 - **Remote direct access to Database**: via a secured gRPC endpoint for direct database access from remote clients. Use [terminal](#remote-database-access-from-terminal) or [DBeaver](https://github.com/litesql/jdbc-ha#dbeaver-integration).
-- **Undo transactions**: Use `pocketbase-ha cli` (or any gRPC client) to execute [UNDO](#undo-transactions) commands on already commited transactions. 
+- **Undo transactions**: Use `pocketbase-ha cli` (or any gRPC client) to execute [UNDO](#undo-transactions) commands on already commited transactions.
 
 ## Architecture
 

@@ -169,6 +169,44 @@ func TestNewCacheRemovesAbandonedTmp(t *testing.T) {
 	}
 }
 
+func TestNewCacheIndexesMetaNamedObjects(t *testing.T) {
+	dir := t.TempDir()
+	c1, err := NewCache(dir, 1024)
+	if err != nil {
+		t.Fatal(err)
+	}
+	key := "col/rec/payload_abc.meta"
+	if err := c1.Put(key, writeTemp(t, c1, string(make([]byte, 200))), fileMeta{ContentType: "text/plain"}); err != nil {
+		t.Fatal(err)
+	}
+	used := c1.Used()
+	if used == 0 {
+		t.Fatal("committed .meta object must count toward used")
+	}
+
+	c2, err := NewCache(dir, 1024)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, _, ok := c2.Get(key); !ok {
+		t.Fatal("Get must still serve a .meta object after restart")
+	}
+	if c2.Used() != used {
+		t.Fatalf("startup used = %d, want %d (sidecar skip must not drop the object)", c2.Used(), used)
+	}
+
+	c3, err := NewCache(dir, 50)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, _, ok := c3.Get(key); ok {
+		t.Fatal("startup must evict a .meta object that exceeds the cap")
+	}
+	if c3.Used() != 0 {
+		t.Fatalf("used = %d, want 0 after evicting the .meta object", c3.Used())
+	}
+}
+
 func TestNewCacheEvictsExistingOverCap(t *testing.T) {
 	dir := t.TempDir()
 	if err := os.WriteFile(filepath.Join(dir, "old.bin"), make([]byte, 200), 0o600); err != nil {

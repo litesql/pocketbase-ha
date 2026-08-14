@@ -104,7 +104,7 @@ func NewCache(root string, capBytes int64) (*Cache, error) {
 			return nil
 		}
 		rel = filepath.ToSlash(rel)
-		if rel == backendFileName || strings.HasPrefix(rel, tmpDirName+"/") || strings.HasSuffix(rel, metaSuffix) {
+		if rel == backendFileName || strings.HasPrefix(rel, tmpDirName+"/") || isSidecarRel(root, rel) {
 			return nil
 		}
 		info, err := d.Info()
@@ -192,6 +192,20 @@ func pathClean(rel string) string {
 		out = append(out, p)
 	}
 	return strings.Join(out, "/")
+}
+
+// isSidecarRel reports whether rel is the JSON sidecar for a sibling object.
+// A committed object whose own name ends in ".meta" is not a sidecar.
+func isSidecarRel(root, rel string) bool {
+	if !strings.HasSuffix(rel, metaSuffix) {
+		return false
+	}
+	bodyRel := strings.TrimSuffix(rel, metaSuffix)
+	if bodyRel == "" || bodyRel == rel {
+		return false
+	}
+	info, err := os.Stat(filepath.Join(root, filepath.FromSlash(bodyRel)))
+	return err == nil && info.Mode().IsRegular()
 }
 
 // Get returns the absolute path of a cached object.
