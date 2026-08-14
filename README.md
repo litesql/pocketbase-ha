@@ -179,7 +179,7 @@ SQLite rows replicate. File bytes do not.
 
 - **Local disk** (`pb_data/storage`): uploads already go to the leader. Replica `GET /api/files/...` authenticates locally, then stream-proxies to the leader on a cache miss. This requires a reachable leader (`PB_LOCAL_TARGET` or `PB_STATIC_LEADER`). If the replica cannot name a leader it returns **502**, not a 404 from empty local `storage/`. Leaderless + local files is unsupported; use S3.
 - **S3/R2**: every node reads the same bucket. Set `PB_FILECACHE_SIZE_BYTES` > 0 to keep a hot copy under `{pb_data}/filecache`. A cache hit skips `fsys.Serve` for that object. `?thumb=` URLs still hit S3 for Exists/Attributes/CreateThumb before the download hook; only the body is served from disk afterwards. PocketBase file hooks drop `{collectionId}/{recordId}/` on update/delete.
-- Toggling S3 in Admin settings wipes the disk cache so keys cannot mix backends.
+- Toggling S3, or changing the S3 bucket/endpoint while S3 stays enabled, wipes the disk cache so keys cannot mix backends. The backend identity is persisted next to the cache (`{PB_FILECACHE_DIR}/.backend`) so a node that was offline during the change still flushes on the next start. Editing unused S3 fields while S3 is off does not flush.
 
 `POST /api/files/token` is never cached. Protected files re-check the token and ViewRule on every request.
 

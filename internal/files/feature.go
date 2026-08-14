@@ -31,10 +31,7 @@ type Feature struct {
 	cache   *Cache
 	leaders LeaderSource
 	limiter fileRateLimiter
-
 	mu      sync.Mutex
-	lastS3  bool
-	s3Known bool
 }
 
 func New(cfg config.Config, leaders LeaderSource) *Feature {

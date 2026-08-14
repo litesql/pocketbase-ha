@@ -15,8 +15,9 @@ import (
 )
 
 const (
-	metaSuffix = ".meta"
-	tmpDirName = ".tmp"
+	metaSuffix      = ".meta"
+	tmpDirName      = ".tmp"
+	backendFileName = ".backend"
 )
 
 var errBadKey = errors.New("invalid cache key")
@@ -103,7 +104,7 @@ func NewCache(root string, capBytes int64) (*Cache, error) {
 			return nil
 		}
 		rel = filepath.ToSlash(rel)
-		if strings.HasPrefix(rel, tmpDirName+"/") || strings.HasSuffix(rel, metaSuffix) {
+		if rel == backendFileName || strings.HasPrefix(rel, tmpDirName+"/") || strings.HasSuffix(rel, metaSuffix) {
 			return nil
 		}
 		info, err := d.Info()

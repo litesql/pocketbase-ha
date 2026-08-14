@@ -122,6 +122,26 @@ func TestCacheRejectsPathEscape(t *testing.T) {
 	}
 }
 
+func TestNewCacheSkipsBackendFingerprint(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, backendFileName), []byte(`{"enabled":true}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "keep.bin"), []byte("ok"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	c, err := NewCache(dir, 1024)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c.Used() != 2 {
+		t.Fatalf("used = %d, want 2 (fingerprint must not be indexed)", c.Used())
+	}
+	if _, _, ok := c.Get("keep.bin"); !ok {
+		t.Fatal("committed objects must still be indexed")
+	}
+}
+
 func TestNewCacheRemovesAbandonedTmp(t *testing.T) {
 	dir := t.TempDir()
 	tmpDir := filepath.Join(dir, tmpDirName)
