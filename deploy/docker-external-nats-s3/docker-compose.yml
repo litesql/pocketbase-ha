@@ -1,0 +1,183 @@
+services:
+  nats:
+    image: nats:alpine
+    command: ["-js", "-sd", "/data", "-m", "8222"]
+    volumes:
+      - nats_data:/data
+    ports:
+      - "4222:4222"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8222/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+  rustfs-perms:
+    image: alpine
+    user: root
+    volumes:
+      - rustfs_data:/fix_path
+    command: chown -R 10001:10001 /fix_path
+
+  rustfs:
+    image: rustfs/rustfs:latest
+    depends_on:
+      rustfs-perms:
+        condition: service_completed_successfully
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - RUSTFS_VOLUMES=/data
+      - RUSTFS_ADDRESS=0.0.0.0:9000
+      - RUSTFS_CONSOLE_ADDRESS=0.0.0.0:9001
+      - RUSTFS_CONSOLE_ENABLE=true
+      - RUSTFS_ACCESS_KEY=rustfsadmin
+      - RUSTFS_SECRET_KEY=rustfsadmin
+    volumes:
+      - rustfs_data:/data
+    command: ["/data"]
+    healthcheck:
+      test: ["CMD", "sh", "-c", "curl -fsS http://127.0.0.1:9000/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  bucket-init:
+    image: amazon/aws-cli:latest
+    depends_on:
+      rustfs:
+        condition: service_healthy
+    volumes:
+      - ../scripts:/scripts:ro
+    environment:
+      - AWS_ACCESS_KEY_ID=rustfsadmin
+      - AWS_SECRET_ACCESS_KEY=rustfsadmin
+      - AWS_DEFAULT_REGION=us-east-1
+      - RUSTFS_ENDPOINT=http://rustfs:9000
+      - S3_BUCKET=pb-files
+    entrypoint: ["/bin/sh", "/scripts/create-bucket.sh"]
+    restart: "no"
+
+  node1:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    volumes:
+      - node1_data:/app/pb_data
+    ports:
+      - "8090:8090"
+      - "9090:9090"
+    environment:
+      - PB_NAME=node1
+      - PB_REPLICAS=1
+      - PB_REPLICATION_URL=nats://nats:4222
+      - PB_ASYNC_PUBLISHER=true
+      - PB_ASYNC_PUBLISHER_DIR=/app/pb_data/outbox
+      - PB_SUPERUSER_EMAIL=test@example.com
+      - PB_SUPERUSER_PASS=1234567890
+      - PB_GRPC_PORT=9090
+      - PB_FILECACHE_SIZE_BYTES=67108864
+    depends_on:
+      nats:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8090/api/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 15s
+
+  node2:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    volumes:
+      - node2_data:/app/pb_data
+    ports:
+      - "8091:8090"
+      - "9091:9090"
+    environment:
+      - PB_NAME=node2
+      - PB_REPLICAS=1
+      - PB_REPLICATION_URL=nats://nats:4222
+      - PB_ASYNC_PUBLISHER=true
+      - PB_ASYNC_PUBLISHER_DIR=/app/pb_data/outbox
+      - PB_GRPC_PORT=9090
+      - PB_FILECACHE_SIZE_BYTES=67108864
+    depends_on:
+      nats:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8090/api/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 15s
+
+  node3:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    volumes:
+      - node3_data:/app/pb_data
+    ports:
+      - "8092:8090"
+      - "9092:9090"
+    environment:
+      - PB_NAME=node3
+      - PB_REPLICAS=1
+      - PB_REPLICATION_URL=nats://nats:4222
+      - PB_ASYNC_PUBLISHER=true
+      - PB_ASYNC_PUBLISHER_DIR=/app/pb_data/outbox
+      - PB_GRPC_PORT=9090
+      - PB_FILECACHE_SIZE_BYTES=67108864
+    depends_on:
+      nats:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8090/api/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 15s
+
+  settings-init:
+    image: curlimages/curl:latest
+    depends_on:
+      node1:
+        condition: service_healthy
+      node2:
+        condition: service_healthy
+      node3:
+        condition: service_healthy
+      bucket-init:
+        condition: service_completed_successfully
+    volumes:
+      - ../scripts:/scripts:ro
+    environment:
+      - PB_URL=http://node1:8090
+      - PB_SUPERUSER_EMAIL=test@example.com
+      - PB_SUPERUSER_PASS=1234567890
+      - ENABLE_S3=true
+      - S3_BUCKET=pb-files
+      - S3_REGION=us-east-1
+      - S3_ENDPOINT=http://rustfs:9000
+      - S3_ACCESS_KEY=rustfsadmin
+      - S3_SECRET_KEY=rustfsadmin
+    entrypoint: ["/bin/sh", "/scripts/bootstrap-settings.sh"]
+    restart: "no"
+
+volumes:
+  nats_data:
+    driver: local
+  rustfs_data:
+    driver: local
+  node1_data:
+    driver: local
+  node2_data:
+    driver: local
+  node3_data:
+    driver: local

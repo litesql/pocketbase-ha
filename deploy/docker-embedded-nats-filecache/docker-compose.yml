@@ -1,0 +1,104 @@
+services:
+  node1:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    volumes:
+      - ../nats:/etc/nats:ro
+      - node1_data:/app/pb_data
+    ports:
+      - "4222:4222"
+      - "8090:8090"
+      - "9090:9090"
+    environment:
+      - PB_NAME=node1
+      - PB_NATS_CONFIG=/etc/nats/node1.cfg
+      - PB_REPLICAS=1
+      - PB_LOCAL_TARGET=http://node1:8090
+      - PB_SUPERUSER_EMAIL=test@example.com
+      - PB_SUPERUSER_PASS=1234567890
+      - PB_GRPC_PORT=9090
+      - PB_FILECACHE_SIZE_BYTES=67108864
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8090/api/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 15s
+
+  node2:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    volumes:
+      - ../nats:/etc/nats:ro
+      - node2_data:/app/pb_data
+    ports:
+      - "4223:4222"
+      - "8091:8090"
+      - "9091:9090"
+    environment:
+      - PB_NAME=node2
+      - PB_NATS_CONFIG=/etc/nats/node2.cfg
+      - PB_REPLICAS=1
+      - PB_LOCAL_TARGET=http://node2:8090
+      - PB_GRPC_PORT=9090
+      - PB_FILECACHE_SIZE_BYTES=67108864
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8090/api/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 15s
+
+  node3:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    volumes:
+      - ../nats:/etc/nats:ro
+      - node3_data:/app/pb_data
+    ports:
+      - "4224:4222"
+      - "8092:8090"
+      - "9092:9090"
+    environment:
+      - PB_NAME=node3
+      - PB_NATS_CONFIG=/etc/nats/node3.cfg
+      - PB_REPLICAS=1
+      - PB_LOCAL_TARGET=http://node3:8090
+      - PB_GRPC_PORT=9090
+      - PB_FILECACHE_SIZE_BYTES=67108864
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8090/api/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 15s
+
+  settings-init:
+    image: curlimages/curl:latest
+    depends_on:
+      node1:
+        condition: service_healthy
+      node2:
+        condition: service_healthy
+      node3:
+        condition: service_healthy
+    volumes:
+      - ../scripts:/scripts:ro
+    environment:
+      - PB_URL=http://node1:8090
+      - PB_SUPERUSER_EMAIL=test@example.com
+      - PB_SUPERUSER_PASS=1234567890
+      - ENABLE_S3=false
+    entrypoint: ["/bin/sh", "/scripts/bootstrap-settings.sh"]
+    restart: "no"
+
+volumes:
+  node1_data:
+    driver: local
+  node2_data:
+    driver: local
+  node3_data:
+    driver: local

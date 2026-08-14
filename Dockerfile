@@ -18,7 +18,7 @@ LABEL org.opencontainers.image.source=https://github.com/litesql/pocketbase-ha
 RUN groupadd --system --gid 1000 ha && \
     useradd --system --uid 1000 --gid 1000 --home /data ha
 
-RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y ca-certificates curl && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 RUN mkdir -p /app/pb_data && chown -R ha:ha /app/pb_data

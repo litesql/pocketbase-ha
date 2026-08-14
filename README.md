@@ -111,13 +111,17 @@ Set up your environment variables to configure the cluster:
 
 > **Note**: You can skip setting the superuser password for the second instance.
 
-### Running a NATS Cluster with docker
+### Running a cluster with Docker
 
-To run a NATS cluster using Docker Compose, use the following command:
+Compose fixtures live under [`deploy/`](deploy/README.md). Only one fixture at a time (they share host ports).
 
-```sh
-docker compose up
-```
+| Fixture | Command |
+|---------|---------|
+| Embedded clustered NATS, local files | `make docker-embedded-nats` |
+| External JetStream NATS, local files | `make docker-external-nats` |
+| Embedded NATS + 64 MiB file cache | `make docker-embedded-nats-filecache` |
+| Embedded NATS + RustFS S3 | `make docker-embedded-nats-s3` |
+| External NATS + RustFS S3 | `make docker-external-nats-s3` |
 
 - Superuser e-mail: test@example.com
 - Superuser pass: 1234567890
@@ -125,7 +129,9 @@ docker compose up
 You can define the superuser password using this command:
 
 ```sh
-docker compose exec -e PB_NATS_CONFIG="" -e PB_LOCAL_TARGET="" node1 /app/pocketbase-ha superuser upsert EMAIL PASS
+docker compose -f deploy/docker-embedded-nats/docker-compose.yml exec \
+  -e PB_NATS_CONFIG="" -e PB_LOCAL_TARGET="" \
+  node1 /app/pocketbase-ha superuser upsert EMAIL PASS
 ```
 
 Access the three nodes using the following address:
@@ -134,7 +140,7 @@ Access the three nodes using the following address:
 - Node2: http://localhost:8091
 - Node3: http://localhost:8092
 
-> **Tip**: Ensure all nodes are synchronized by verifying the logs or using the PocketBase admin interface.
+> **Tip**: Ensure all nodes are synchronized by verifying the logs or using the PocketBase admin interface. See [deploy/README.md](deploy/README.md) for ports, RustFS, and verify scripts.
 
 ### Event Hooks on replica nodes
 
