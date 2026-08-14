@@ -93,6 +93,7 @@ func NewCache(root string, capBytes int64) (*Cache, error) {
 	if err := os.MkdirAll(root, 0o700); err != nil {
 		return nil, err
 	}
+	_ = os.RemoveAll(filepath.Join(root, tmpDirName))
 	_ = filepath.WalkDir(root, func(p string, d fs.DirEntry, err error) error {
 		if err != nil || d == nil || d.IsDir() {
 			return nil

@@ -122,6 +122,33 @@ func TestCacheRejectsPathEscape(t *testing.T) {
 	}
 }
 
+func TestNewCacheRemovesAbandonedTmp(t *testing.T) {
+	dir := t.TempDir()
+	tmpDir := filepath.Join(dir, tmpDirName)
+	if err := os.MkdirAll(tmpDir, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	part := filepath.Join(tmpDir, "leftover.part")
+	if err := os.WriteFile(part, make([]byte, 200), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	keep := filepath.Join(dir, "keep.bin")
+	if err := os.WriteFile(keep, []byte("ok"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	c, err := NewCache(dir, 1024)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(part); !os.IsNotExist(err) {
+		t.Fatalf("abandoned tmp must be removed, err=%v", err)
+	}
+	if _, _, ok := c.Get("keep.bin"); !ok {
+		t.Fatal("committed objects must survive tmp cleanup")
+	}
+}
+
 func TestNewCacheEvictsExistingOverCap(t *testing.T) {
 	dir := t.TempDir()
 	if err := os.WriteFile(filepath.Join(dir, "old.bin"), make([]byte, 200), 0o600); err != nil {
