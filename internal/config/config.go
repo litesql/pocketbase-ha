@@ -28,6 +28,8 @@ const (
 	envStreamMaxAge      = "PB_STREAM_MAX_AGE"
 	envSuperuserEmail    = "PB_SUPERUSER_EMAIL"
 	envSuperuserPass     = "PB_SUPERUSER_PASS"
+	envFileCacheDir      = "PB_FILECACHE_DIR"
+	envFileCacheSize     = "PB_FILECACHE_SIZE_BYTES"
 )
 
 // Row identify strategies accepted by PB_ROW_IDENTIFY.
@@ -39,21 +41,23 @@ const (
 
 // Config is the typed cluster configuration sourced from PB_* environment variables.
 type Config struct {
-	Name              string
-	ReplicationURL    string
-	AsyncPublisher    bool
-	AsyncPublisherDir string
-	ReplicationStream string
-	EmbeddedNATS      *EmbeddedNATS
-	Replicas          *int
-	RowIdentify       string
-	StaticLeader      string
-	LocalTarget       string
-	GRPCPort          *int
-	GRPCToken         string
-	StreamMaxAge      time.Duration
-	SuperuserEmail    string
-	SuperuserPass     string
+	Name               string
+	ReplicationURL     string
+	AsyncPublisher     bool
+	AsyncPublisherDir  string
+	ReplicationStream  string
+	EmbeddedNATS       *EmbeddedNATS
+	Replicas           *int
+	RowIdentify        string
+	StaticLeader       string
+	LocalTarget        string
+	GRPCPort           *int
+	GRPCToken          string
+	StreamMaxAge       time.Duration
+	SuperuserEmail     string
+	SuperuserPass      string
+	FileCacheDir       string
+	FileCacheSizeBytes int64
 }
 
 // EmbeddedNATS holds embedded NATS server settings. File, when set, overrides Port/StoreDir.
@@ -85,6 +89,7 @@ func Parse(getenv func(string) string) (Config, error) {
 		SuperuserPass:     getenv(envSuperuserPass),
 		ReplicationStream: getenv(envReplicationStream),
 		StreamMaxAge:      DefaultStreamMaxAge,
+		FileCacheDir:      getenv(envFileCacheDir),
 	}
 
 	if cfg.ReplicationStream == "" {
@@ -143,6 +148,17 @@ func Parse(getenv func(string) string) (Config, error) {
 			return Config{}, fmt.Errorf("invalid %s value: %w", envStreamMaxAge, err)
 		}
 		cfg.StreamMaxAge = maxAge
+	}
+
+	if size := getenv(envFileCacheSize); size != "" {
+		n, err := strconv.ParseInt(size, 10, 64)
+		if err != nil {
+			return Config{}, fmt.Errorf("invalid %s value: %w", envFileCacheSize, err)
+		}
+		if n < 0 {
+			return Config{}, fmt.Errorf("invalid %s value: must be >= 0", envFileCacheSize)
+		}
+		cfg.FileCacheSizeBytes = n
 	}
 
 	return cfg, nil

@@ -1,4 +1,7 @@
 # PocketBase HA
+
+> This is a fork of [pocketbase-ha](https://github.com/litesql/pocketbase-ha) with some additional features and fixes.
+
 Highly Available Leader/Leaderless [PocketBase](https://pocketbase.io/) Cluster powered by `go-ha` [database/sql driver](https://github.com/litesql/go-ha).
 
 ## Features
@@ -7,7 +10,7 @@ Highly Available Leader/Leaderless [PocketBase](https://pocketbase.io/) Cluster 
 - **Replication**: Synchronize data across nodes using NATS.
 - **Embedded or External NATS**: Choose between an embedded NATS server or an external one for replication.
 - **Remote direct access to Database**: via a secured gRPC endpoint for direct database access from remote clients. Use [terminal](#remote-database-access-from-terminal) or [DBeaver](https://github.com/litesql/jdbc-ha#dbeaver-integration).
-- **Undo transactions**: Use `pocketbase-ha cli` (or any gRPC client) to execute [UNDO](#undo-transactions) commands on already commited transactions. 
+- **Undo transactions**: Use `pocketbase-ha cli` (or any gRPC client) to execute [UNDO](#undo-transactions) commands on already commited transactions.
 
 ## Architecture
 
@@ -17,6 +20,7 @@ Highly Available Leader/Leaderless [PocketBase](https://pocketbase.io/) Cluster 
 - `internal/hadriver` — `go-ha` SQL driver registration
 - `internal/realtime` — replica CDC to PocketBase model events
 - `internal/cluster` — leader routing and local `/api/realtime`
+- `internal/files` — replica local-file proxy and optional disk cache for `/api/files`
 - `internal/server` — composition root; extra capabilities implement `internal/feature.Feature` and are registered there
 
 ## Prerequisites
@@ -86,6 +90,8 @@ Set up your environment variables to configure the cluster:
 | `PB_SUPERUSER_EMAIL` | Superuser email created at startup | |
 | `PB_SUPERUSER_PASS` | Superuser password created at startup | |
 | `PB_STREAM_MAX_AGE` | Local transactions history and NATS stream max age. Used in undo operations from CLI. Set to zero to disable _history.db | 72h |
+| `PB_FILECACHE_DIR` | Directory for the optional `/api/files` disk cache. Defaults to `{pb_data}/filecache`. Relative values are resolved against `pb_data`. Rejected if it is `pb_data`, `pb_data/storage`, or anything inside `storage/`. | `{pb_data}/filecache` |
+| `PB_FILECACHE_SIZE_BYTES` | Byte cap for the disk LRU. `0` disables caching. Replica local-file proxy still runs when S3 is off. | 0 |
 
 ## Usage
 
@@ -169,6 +175,18 @@ This ensures all mutations route through the leader while reads can be distribut
 ![write-path](./img/leader_write.png)
 
 ![read-path](./img/leader_read.png)
+
+### File storage on a cluster
+
+SQLite rows replicate. File bytes do not.
+
+- **Local disk** (`pb_data/storage`): uploads already go to the leader. Replica `GET /api/files/...` authenticates locally, then stream-proxies to the leader on a cache miss. This requires a reachable leader (`PB_LOCAL_TARGET` or `PB_STATIC_LEADER`). If the replica cannot name a leader it returns **502**, not a 404 from empty local `storage/`. Leaderless + local files is unsupported; use S3.
+- **S3/R2**: every node reads the same bucket. Set `PB_FILECACHE_SIZE_BYTES` > 0 to keep a hot copy under `{pb_data}/filecache`. A cache hit skips `fsys.Serve` for that object. `?thumb=` URLs still hit S3 for Exists/Attributes/CreateThumb before the download hook; only the body is served from disk afterwards. PocketBase file hooks drop `{collectionId}/{recordId}/` on update/delete.
+- Toggling S3, or changing the S3 bucket/endpoint while S3 stays enabled, wipes the disk cache so keys cannot mix backends. The backend identity is persisted next to the cache (`{PB_FILECACHE_DIR}/.backend`) so a node that was offline during the change still flushes on the next start. Editing unused S3 fields while S3 is off does not flush.
+
+`POST /api/files/token` is never cached. Protected files re-check the token and ViewRule on every request.
+
+Replica `GET /api/files` forwards `X-Forwarded-For` set to the replica’s `RealIP()`. If you use `SuperuserIPs`, set **Trusted Proxy headers** (typically `X-Forwarded-For`) on every node so the leader sees the client IP, not the replica.
 
 ### Remote database access from terminal
 
