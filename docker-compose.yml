@@ -4,6 +4,7 @@ services:
     volumes:
       - ./testdata:/etc/nats
       - node1_data:/app/pb_data
+    restart: on-failure
     ports:
       - "4222:4222"
       - "8090:8090"
@@ -22,6 +23,7 @@ services:
     volumes:
       - ./testdata:/etc/nats
       - node2_data:/app/pb_data
+    restart: on-failure
     ports:
       - "4223:4222"      
       - "8091:8090"
@@ -38,6 +40,7 @@ services:
     volumes:
       - ./testdata:/etc/nats
       - node3_data:/app/pb_data
+    restart: on-failure
     ports:
       - "4224:4222"
       - "8092:8090"
