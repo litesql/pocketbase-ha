@@ -61,7 +61,6 @@ Set up your environment variables to configure the cluster:
 | Environment Variable | Description                                                                 | Default |
 |----------------------|-----------------------------------------------------------------------------|---------|
 | `PB_ASYNC_PUBLISHER` | Enables asynchronous replication message publishing. Recommended only when using an external NATS server. | false |
-| `PB_ASYNC_PUBLISHER_DIR` | Directory path for storing outbox messages used in asynchronous replication. |    |
 | `PB_GRPC_PORT` | TCP Port for the gRPC service to enable remote database access. | |
 | `PB_GRPC_TOKEN` | Authentication token for securing remote database access via gRPC. | |
 | `PB_LOCAL_TARGET`    | Specifies the service URL to redirect requests when this node is the leader. Useful for enabling leader election. | |

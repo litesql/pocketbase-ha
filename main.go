@@ -44,8 +44,7 @@ func init() {
 			log.Fatalf("invalid PB_ASYNC_PUBLISHER: %v", err)
 		}
 		if b {
-			drv.Options = append(drv.Options, ha.WithAsyncPublisher(),
-				ha.WithAsyncPublisherOutboxDir(os.Getenv("PB_ASYNC_PUBLISHER_DIR")))
+			drv.Options = append(drv.Options, ha.WithAsyncPublisher())
 		}
 	}
 
