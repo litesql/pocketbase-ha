@@ -12,16 +12,16 @@ import (
 	"strings"
 	"time"
 
+	"ganigeorgiev.com/pocketbase/dbx"
+	"ganigeorgiev.com/pocketbase/pocketbase"
+	"ganigeorgiev.com/pocketbase/pocketbase/apis"
+	"ganigeorgiev.com/pocketbase/pocketbase/core"
+	"ganigeorgiev.com/pocketbase/pocketbase/plugins/ghupdate"
+	"ganigeorgiev.com/pocketbase/pocketbase/plugins/jsvm"
+	"ganigeorgiev.com/pocketbase/pocketbase/plugins/migratecmd"
+	"ganigeorgiev.com/pocketbase/pocketbase/tools/osutils"
 	"github.com/litesql/go-ha"
 	"github.com/litesql/pocketbase-ha/remote"
-	"github.com/pocketbase/dbx"
-	"github.com/pocketbase/pocketbase"
-	"github.com/pocketbase/pocketbase/apis"
-	"github.com/pocketbase/pocketbase/core"
-	"github.com/pocketbase/pocketbase/plugins/ghupdate"
-	"github.com/pocketbase/pocketbase/plugins/jsvm"
-	"github.com/pocketbase/pocketbase/plugins/migratecmd"
-	"github.com/pocketbase/pocketbase/tools/osutils"
 )
 
 var (
