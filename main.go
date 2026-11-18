@@ -121,6 +121,21 @@ func init() {
 		drv.Options = append(drv.Options, ha.WithStreamMaxAge(72*time.Hour))
 	}
 
+	if conflictResolution := os.Getenv("PB_CONFLICT_RESOLUTION"); conflictResolution != "" {
+		typ, col, hasCol := strings.Cut(conflictResolution, ":")
+		switch strings.ToLower(typ) {
+		case "lww":
+			drv.Options = append(drv.Options, ha.WithChangeSetInterceptor(ha.NewCompositeInterceptor(ha.NewLastWriterWinsInterceptor(), interceptor)))
+		case "column":
+			if !hasCol || col == "" {
+				panic("invalid PB_CONFLICT_RESOLUTION (column:<col> col cannot be empty) value: " + conflictResolution)
+			}
+			drv.Options = append(drv.Options, ha.WithChangeSetInterceptor(ha.NewCompositeInterceptor(ha.NewColumnLWWInterceptor(col), interceptor)))
+		default:
+			panic("invalid PB_CONFLICT_RESOLUTION (use lww or column:<col>) value: " + conflictResolution)
+		}
+	}
+
 	sql.Register("pb_ha", &drv)
 
 	dbx.BuilderFuncMap["pb_ha"] = dbx.BuilderFuncMap["sqlite"]
