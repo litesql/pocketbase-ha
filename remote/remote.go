@@ -275,7 +275,7 @@ func Start(remote string, token string, replicationID string) {
 				for _, row := range resp.ResultSet.Rows {
 					var cells []string
 					for _, val := range row.Values {
-						cells = append(cells, fmt.Sprint(haconnect.FromAnypb(val)))
+						cells = append(cells, fmt.Sprint(haconnect.FromTypedValue(val)))
 					}
 					t.Row(cells...)
 				}
